@@ -103,15 +103,6 @@ export const postReactions = async (req, res) => {
                 });
             }
             }
-            await post.updateOne({
-                _id: postId
-            }, {
-                $push: {
-                    reaction: userId
-                }
-            })
-            
-
         
         // await post.updateOne({ $addToSet: { reactions: userId } })
 
@@ -129,6 +120,72 @@ export const postReactions = async (req, res) => {
         post.reactions.push(reaction._id)
         await post.save()
 
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+export const addComment = async (req,res) =>{
+    try {
+        const userId = req.id;
+        const postId = req.params.id;
+
+        const text = req.body;
+
+        const post = await Post.findById(postId)
+
+        if(!text){
+            return res.status(401).json({
+                message:"Text is required",
+                success: false
+            })
+        }
+
+        const comment = await Comment.create({
+            text:text,
+            author: userId,
+            post:postId
+        })
+
+        await comment.populate({
+            path: "author",
+            select: "username profilePicture"
+        })
+
+        post.comments.push(comment._id);
+        await post.save()
+
+        return res.status(200).json({
+            message:'Comment is Added',
+            comment,
+            success:true
+        })
+
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+export const getCommentsofPost = async(req,res) =>{
+    try {
+        const postId=req.params.id;
+        const comments = await Comment.find({post: postId}).populate({
+            path: "author",
+            select:"username profilePicture"
+        })
+
+        if(!comments){
+            return res.status(401).json({
+                message: "There is no comments for this post",
+                success: false
+            })
+        }
+
+        return res.status(200).json({
+            message:"Comments found",
+            success:true,
+            comments
+        })
     } catch (error) {
         console.log(error);
     }
