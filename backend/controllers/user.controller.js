@@ -119,14 +119,47 @@ export const getProfile = async (req, res) => {
         const userId = req.params.id;
         let user = await User.findById(userId).populate([
             {
-                path: "posts saved",
+                path: "posts",
                 populate: [
                     {
                         path: "author",
                         select: "username profilePicture"
                     },
                     {
-                        path: "comments reactions",
+                        path: "comments",
+                        options: { sort: { createdAt: -1 } },
+                        populate: {
+                            path: "author",
+                            select: "username profilePicture"
+                        }
+                    },
+                    {
+                        path: "reactions",
+                        options: { sort: { createdAt: -1 } },
+                        populate: {
+                            path: "author",
+                            select: "username profilePicture"
+                        }
+                    }
+                ]
+            },
+            {
+                path: "saved",
+                populate: [
+                    {
+                        path: "author",
+                        select: "username profilePicture"
+                    },
+                    {
+                        path: "comments",
+                        options: { sort: { createdAt: -1 } },
+                        populate: {
+                            path: "author",
+                            select: "username profilePicture"
+                        }
+                    },
+                    {
+                        path: "reactions",
                         options: { sort: { createdAt: -1 } },
                         populate: {
                             path: "author",
@@ -140,7 +173,6 @@ export const getProfile = async (req, res) => {
                 select: "username profilePicture"
             }
         ]);
-
 
         return res.status(200).json({
             user,
