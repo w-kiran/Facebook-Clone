@@ -11,5 +11,6 @@ const userSchema = new mongoose.Schema({
     friends:[{type:mongoose.Schema.Types.ObjectId ,ref:"User"}],
     posts:[{type:mongoose.Schema.Types.ObjectId ,ref:"Post"}],
     saved:[{type:mongoose.Schema.Types.ObjectId ,ref:"Post"}],
+    blockedUsers:[{type:mongoose.Schema.Types.ObjectId ,ref:"User"}]
 })
 export const User = mongoose.model("User",userSchema)

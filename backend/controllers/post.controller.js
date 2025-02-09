@@ -215,6 +215,31 @@ export const getCommentsofPost = async (req, res) => {
     }
 }
 
+export const deleteComment = async (req, res) => {
+    try {
+        const commentId = req.params.id;
+        const comment = await Comment.findById(commentId)
+            .populate('user', '_id')
+            .populate('post', '_id user');
+
+        if (!comment) {
+            return res.status(404).json({ success: false, message: "Comment not found" });
+        }
+
+        // Check if user is authorized (comment author or post owner)
+        if (comment.user._id.toString() !== req.user._id.toString() && 
+            comment.post.user.toString() !== req.user._id.toString()) {
+            return res.status(403).json({ success: false, message: "Unauthorized to delete this comment" });
+        }
+
+        await Comment.findByIdAndDelete(commentId);
+        return res.status(200).json({ success: true, message: "Comment deleted successfully" });
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ success: false, message: "Internal server error" });
+    }
+}
+
 export const deletePost = async (req, res) => {
     try {
         const userId = req.id;
@@ -360,3 +385,21 @@ export const savedPost = async (req, res) => {
         });
     }
 };
+
+export const getSavedPosts = async (req,res) => {
+    try {
+        const userId = req.id;
+        const savedPosts = await User.findById(userId).populate({
+            path:'saved',
+            populate:{
+                path:'author',
+                select:'username profilePicture'
+            }
+        })
+        if(!savedPosts) return res.status(404).json({success:false, message:"No saved posts found"});
+        return res.status(200).json({success:true, savedPosts});
+
+    } catch (error) {
+        console.log(error);
+    }
+}
