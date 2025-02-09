@@ -8,7 +8,7 @@ import { Reactions } from "../models/reaction.model.js";
 export const addNewPost = async (req, res) => {
     try {
         const userId = req.id;
-        const { caption } = req.body;
+        const { caption, visibility } = req.body;
         const image = req.file;
 
         if (!image && !caption) {
@@ -25,10 +25,12 @@ export const addNewPost = async (req, res) => {
 
         const fileUri = `data:image/jpeg;base64,${optimizedImageBuffer.toString('base64')}`;
         const cloudResponse = await cloudinary.uploader.upload(fileUri)
+
         const post = await Post.create({
             caption,
             image: cloudResponse.secure_url,
-            author: userId
+            author: userId,
+            visibility: visibility || 'public'
         })
 
         const user = await User.findById(userId)
@@ -54,31 +56,45 @@ export const addNewPost = async (req, res) => {
 
 export const getAllPosts = async (req, res) => {
     try {
-        const post = await Post.find().sort({createdAt:-1})
-        .populate([{
-                path:'author',
-                select:'username profilePicture'
+        const userId = req.id;
+        const user = await User.findById(userId)
+
+        const post = await Post.find({
+            $or: [
+                { visibility: 'public' },
+                {
+                    visibility: 'friends',
+                    author: { $in: user.friends }
+                },
+                {
+                    author: userId
+                }
+            ]
+        }).sort({ createdAt: -1 })
+            .populate([{
+                path: 'author',
+                select: 'username profilePicture'
             },
             {
-                path:'comments',
-                populate:{
-                    path:'author',
-                    select:'username profilePicture'
+                path: 'comments',
+                populate: {
+                    path: 'author',
+                    select: 'username profilePicture'
                 }
             },
             {
-                path:'reactions',
-                populate:{
-                    path:'author',
-                    select:'username profilePicture'
+                path: 'reactions',
+                populate: {
+                    path: 'author',
+                    select: 'username profilePicture'
                 }
             },
-           
-        ])
-        
+
+            ])
+
         return res.status(200).json({
-            message:'Watch feed',
-            success:true,
+            message: 'Watch feed',
+            success: true,
             post
         })
     } catch (error) {
@@ -154,7 +170,7 @@ export const addComment = async (req, res) => {
         const userId = req.id;
         const postId = req.params.id;
 
-        const {text} = req.body;
+        const { text } = req.body;
 
         const post = await Post.findById(postId)
 
@@ -227,7 +243,7 @@ export const deleteComment = async (req, res) => {
         }
 
         // Check if user is authorized (comment author or post owner)
-        if (comment.user._id.toString() !== req.user._id.toString() && 
+        if (comment.user._id.toString() !== req.user._id.toString() &&
             comment.post.user.toString() !== req.user._id.toString()) {
             return res.status(403).json({ success: false, message: "Unauthorized to delete this comment" });
         }
@@ -386,20 +402,62 @@ export const savedPost = async (req, res) => {
     }
 };
 
-export const getSavedPosts = async (req,res) => {
+export const sharePost = async (req, res) => {
     try {
         const userId = req.id;
-        const savedPosts = await User.findById(userId).populate({
-            path:'saved',
-            populate:{
-                path:'author',
-                select:'username profilePicture'
-            }
-        })
-        if(!savedPosts) return res.status(404).json({success:false, message:"No saved posts found"});
-        return res.status(200).json({success:true, savedPosts});
+        const postId = req.params.id;
+        const {caption} = req.body;
+
+        const post = await Post.findById(postId);
+
+        if (!post) {
+            return res.status(404).json({
+                message: "Post not found",
+                success: false
+            });
+        }
+
+        let user = await User.findById(userId);
+
+        // Create a new post with the shared post reference
+        const newSharedPost = await Post.create({
+            caption:caption || "",
+            author: userId,
+            ifShared: postId, // Store the original post reference
+        });
+
+        // Update user document with shared post
+        await user.updateOne({ $addToSet: { sharedPost: newSharedPost._id } });
+
+        // Populate sharedPost to return updated data
+        await user.populate({
+            path: "sharedPost",
+            populate: [
+                {
+                    path: "author",
+                    select: "username profilePicture"
+                },
+                {
+                    path: "ifShared",
+                    populate: {
+                        path: "author",
+                        select: "username profilePicture caption image"
+                    }
+                }
+            ]
+        });
+
+        return res.status(200).json({
+            message: "Post shared successfully",
+            success: true,
+            sharedPost: newSharedPost
+        });
 
     } catch (error) {
-        console.log(error);
+        console.error(error);
+        return res.status(500).json({
+            message: "Internal Server Error",
+            success: false
+        });
     }
-}
+};
