@@ -128,7 +128,7 @@ export const getProfile = async (req, res) => {
                 success: false
             })
         }
-        if (user.blockedUsers.includes(myId)){
+        if (user.blockedUsers.includes(myId)) {
             return res.status(401).json({
                 message: "User not found",
                 success: false
@@ -439,6 +439,64 @@ export const blockedUsers = async (req, res) => {
             user
         })
 
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+export const mutualFriends = async (req, res) => {
+    try {
+        const myId = req.id;
+        const targetUserId = req.params.id;
+        const me = await User.findById(myId);
+        const targetUser = await User.findById(targetUserId)
+        const myFriend = me.friends;
+        const targetFriend = targetUser.friends;
+
+        if (!targetUser) {
+            return res.status(401).json({
+                message: "User not found",
+                success: false
+            })
+        }
+        const mutualFriends = myFriend.filter(friend => targetFriend.includes(friend))
+        const populatedMutualFriends = await User.find({ _id: { $in: mutualFriends } }).select("username profilePicture")
+
+
+        return res.status(200).json({
+            success: true,
+            mutual: populatedMutualFriends
+        })
+
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+export const searchUsers = async (req, res) => {
+    try {
+        const userId = req.id
+        const { searchRes } = req.body
+
+        const user = await User.findById(userId)
+
+        if (!user) {
+            return res.status(401).json({
+                message: "User not authenticated",
+                success: false
+            })
+        }
+
+        const searchResults = await User.find({
+            _id: { $nin: user.blockedUsers },
+            username: { $regex: new RegExp(searchRes,"i")},
+            blockedUsers: {$nin: [userId]}
+        }).select("username profilePicture")
+
+        return res.status(200).json({
+            success: true,
+            searchResults
+        })
     } catch (error) {
         console.log(error);
     }
