@@ -11,6 +11,6 @@ const postSchema = new mongoose.Schema({
         enum: ['public','friends','private'],
         default: 'public'
     },
-    ifShared:[{type:mongoose.Schema.Types.ObjectId ,ref:"Post"}]
+    originalPost:{type:mongoose.Schema.Types.ObjectId ,ref:"Post"}
 })
 export const Post = mongoose.model("Post",postSchema);

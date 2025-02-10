@@ -388,7 +388,7 @@ export const deleteAccount = async (req, res) => {
     }
 }
 
-export const blockedUsers = async (req, res) => {
+export const blockUsers = async (req, res) => {
     try {
         const userId = req.id;
         const targetUserId = req.params.id;

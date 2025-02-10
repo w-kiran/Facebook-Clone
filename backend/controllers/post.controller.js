@@ -338,7 +338,7 @@ export const deletePost = async (req, res) => {
 //     }
 // }
 
-export const savedPost = async (req, res) => {
+export const savePost = async (req, res) => {
     try {
         const userId = req.id;
         const postId = req.params.id;
@@ -423,34 +423,33 @@ export const sharePost = async (req, res) => {
         const newSharedPost = await Post.create({
             caption:caption || "",
             author: userId,
-            ifShared: postId, // Store the original post reference
+            originalPost: postId, // Store the original post reference
         });
 
         // Update user document with shared post
-        await user.updateOne({ $addToSet: { sharedPost: newSharedPost._id } });
+        await user.updateOne({ $addToSet: { posts: newSharedPost._id } });
 
         // Populate sharedPost to return updated data
-        await user.populate({
-            path: "sharedPost",
-            populate: [
-                {
-                    path: "author",
-                    select: "username profilePicture"
-                },
-                {
-                    path: "ifShared",
-                    populate: {
-                        path: "author",
-                        select: "username profilePicture caption image"
-                    }
-                }
-            ]
-        });
+        // await user.populate({
+        //     path: "posts",
+        //     populate: [
+        //         {
+        //             path: "author",
+        //             select: "username profilePicture"
+        //         },
+        //         {
+        //             path: "originalPost",
+        //             populate: {
+        //                 path: "author",
+        //                 select: "username profilePicture caption image"
+        //             }
+        //         }
+        //     ]
+        // });
 
         return res.status(200).json({
             message: "Post shared successfully",
             success: true,
-            sharedPost: newSharedPost
         });
 
     } catch (error) {
