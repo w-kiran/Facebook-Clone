@@ -7,7 +7,7 @@ const router = express.Router()
 
 router.route('/register').post(register);
 router.route('/login').post(login);
-router.route('/logout').post(logout);
+router.route('/logout').get(logout);
 router.route('/:id/profile').get(isAuth,getProfile);
 router.route('/profile/edit').post(isAuth,upload.fields([{ name: "profilePicture", maxCount: 1 },{ name: "coverPhoto", maxCount: 1 }]),editProfile);
 router.route('/suggested').get(isAuth,SuggestedUser)

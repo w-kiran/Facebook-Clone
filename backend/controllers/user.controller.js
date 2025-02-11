@@ -10,10 +10,10 @@ import { Message } from "../models/message.model.js"
 
 export const register = async (req, res) => {
     try {
-        const { username, email, password } = req.body
+        const { username, email, password, gender } = req.body
 
-        if (!username || !email || !password) {
-            return res.status(401).json({
+        if (!username || !email || !password || !gender) {
+            return res.status(404).json({
                 message: "Something is missing",
                 success: false
             })
@@ -21,7 +21,7 @@ export const register = async (req, res) => {
 
         const user = await User.findOne({ email })
         if (user) {
-            return res.status(401).json({
+            return res.status(404).json({
                 message: "Try different email.",
                 success: false
             })
@@ -32,6 +32,7 @@ export const register = async (req, res) => {
         await User.create({
             username,
             email,
+            gender,
             password: hashedPassword
         })
 
@@ -122,6 +123,7 @@ export const getProfile = async (req, res) => {
         const Me = await User.findById(myId)
         const userId = req.params.id;
         let user = await User.findById(userId)
+        
         if (Me.blockedUsers.includes(userId)) {
             return res.status(401).json({
                 message: "User blocked",
@@ -134,7 +136,8 @@ export const getProfile = async (req, res) => {
                 success: false
             })
         }
-        user.populate([
+        
+        await user.populate([
             {
                 path: "posts",
                 populate: [
