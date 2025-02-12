@@ -4,6 +4,7 @@ import { Comment } from "../models/comment.model.js"
 import sharp from "sharp"
 import cloudinary from "../utils/cloudinary.js";
 import { Reactions } from "../models/reaction.model.js";
+import { populate } from "dotenv";
 
 export const addNewPost = async (req, res) => {
     try {
@@ -89,6 +90,13 @@ export const getAllPosts = async (req, res) => {
                     select: 'username profilePicture'
                 }
             },
+            {
+                path: 'originalPost',
+                populate: {
+                    path: 'author' ,
+                    select: "username profilePicture"
+                }
+            }
 
             ])
 
@@ -107,10 +115,11 @@ export const postReactions = async (req, res) => {
         const userId = req.id
         const postId = req.params.id;
         const post = await Post.findById(postId)
-        const {reaction} = req.body;
-        if(!reaction){
+        const { reaction } = req.body;
+
+        if (!reaction) {
             return res.status(401).json({
-                message:"Reaction Type null",
+                message: "Reaction Type null",
                 success: false
             })
         }
@@ -121,11 +130,11 @@ export const postReactions = async (req, res) => {
             })
         }
 
-        const existingReaction = await Reactions.findOne({reaction, author: userId, post: postId });
+        const existingReaction = await Reactions.findOne({ author: userId, post: postId });
         if (existingReaction) {
             if (existingReaction.reaction === reaction) {
                 await Reactions.deleteOne({_id:existingReaction._id})
-                await post.reactions.pull(existingReaction._id)
+                post.reactions = post.reactions.filter(id => id.toString() !== existingReaction._id.toString());
                 await post.save();
                 return res.status(200).json({
                     message: "Reaction removed",
@@ -133,7 +142,7 @@ export const postReactions = async (req, res) => {
                 });
             }
             else {
-                existingReaction.type = reaction
+                existingReaction.reaction = reaction
                 await existingReaction.save()
                 await post.save()
                 return res.status(200).json({
@@ -142,35 +151,37 @@ export const postReactions = async (req, res) => {
                 });
             }
         }
-
         // await post.updateOne({ $addToSet: { reactions: userId } })
 
-        const reactioncreate=await Reactions.create({
-            reaction,
-            author: userId,
-            post: postId
-        })
+        else {
+            const reactioncreate = await Reactions.create({
+                reaction,
+                author: userId,
+                post: postId
+            })
 
-        // await reaction.populate({
-        //     path: 'author',
-        //     select: "username profilePicture"
-        // })
+            // await reaction.populate({
+            //     path: 'author',
+            //     select: "username profilePicture"
+            // })
 
-        // await post.populate({
-        //     path: reactions,
-        //     populate: {
-        //         path: 'author',
-        //         select: "username profilePicture"
-        //     }
-        // })
+            // await post.populate({
+            //     path: reactions,
+            //     populate: {
+            //         path: 'author',
+            //         select: "username profilePicture"
+            //     }
+            // })
 
-        post.reactions.push(reactioncreate._id)
-        await post.save()
+            post.reactions.push(reactioncreate._id)
+            await post.save()
 
-        return res.status(200).json({
-            message:"Reaction Added",
-            success: true,
-        })
+            return res.status(200).json({
+                message: "Reaction Added",
+                success: true,
+            })
+        }
+
 
     } catch (error) {
         console.log(error);
@@ -418,7 +429,7 @@ export const sharePost = async (req, res) => {
     try {
         const userId = req.id;
         const postId = req.params.id;
-        const {caption} = req.body;
+        const { caption } = req.body;
 
         const post = await Post.findById(postId);
 
@@ -433,7 +444,7 @@ export const sharePost = async (req, res) => {
 
         // Create a new post with the shared post reference
         const newSharedPost = await Post.create({
-            caption:caption || "",
+            caption: caption || "",
             author: userId,
             originalPost: postId, // Store the original post reference
         });
