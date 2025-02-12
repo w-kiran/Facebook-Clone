@@ -12,7 +12,7 @@ import { setPosts } from '@/redux/postSlice';
 import { BACKEND_URL } from '../../configURL';
 
 
-const CreatePost = ({open,setOpen}) => {
+const CreatePostDialog = ({open,setOpen}) => {
 
     const imageRef = useRef();
     const [file, setFile] = useState("");
@@ -97,4 +97,4 @@ const CreatePost = ({open,setOpen}) => {
       )
     }
 
-export default CreatePost
+export default CreatePostDialog

@@ -90,7 +90,7 @@ export const login = async (req, res) => {
             _id: user._id,
             username: user.username,
             email: user.email,
-            profilepicture: user.profilepicture,
+            profilePicture: user.profilePicture,
             bio: user.bio,
             friends: user.friends,
             posts: populatedPosts
@@ -136,7 +136,7 @@ export const getProfile = async (req, res) => {
                 success: false
             })
         }
-        
+
         await user.populate([
             {
                 path: "posts",

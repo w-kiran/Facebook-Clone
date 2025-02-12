@@ -107,7 +107,13 @@ export const postReactions = async (req, res) => {
         const userId = req.id
         const postId = req.params.id;
         const post = await Post.findById(postId)
-        const reactionType = req.body;
+        const {reaction} = req.body;
+        if(!reaction){
+            return res.status(401).json({
+                message:"Reaction Type null",
+                success: false
+            })
+        }
         if (!post) {
             return res.status(401).json({
                 message: "Post not found",
@@ -115,9 +121,10 @@ export const postReactions = async (req, res) => {
             })
         }
 
-        const existingReaction = await Reactions.findOne({ author: userId, post: postId });
+        const existingReaction = await Reactions.findOne({reaction, author: userId, post: postId });
         if (existingReaction) {
-            if (existingReaction.type === reactionType) {
+            if (existingReaction.reaction === reaction) {
+                await Reactions.deleteOne({_id:existingReaction._id})
                 await post.reactions.pull(existingReaction._id)
                 await post.save();
                 return res.status(200).json({
@@ -126,28 +133,28 @@ export const postReactions = async (req, res) => {
                 });
             }
             else {
-                existingReaction.type = reactionType
+                existingReaction.type = reaction
                 await existingReaction.save()
+                await post.save()
                 return res.status(200).json({
                     message: "Reaction updated",
                     success: true,
-                    reaction: existingReaction
                 });
             }
         }
 
         // await post.updateOne({ $addToSet: { reactions: userId } })
 
-        const reaction = await Reactions.create({
-            type: reactionType,
+        const reactioncreate=await Reactions.create({
+            reaction,
             author: userId,
             post: postId
         })
 
-        await reaction.populate({
-            path: 'author',
-            select: "username profilePicture"
-        })
+        // await reaction.populate({
+        //     path: 'author',
+        //     select: "username profilePicture"
+        // })
 
         // await post.populate({
         //     path: reactions,
@@ -157,8 +164,13 @@ export const postReactions = async (req, res) => {
         //     }
         // })
 
-        post.reactions.push(reaction._id)
+        post.reactions.push(reactioncreate._id)
         await post.save()
+
+        return res.status(200).json({
+            message:"Reaction Added",
+            success: true,
+        })
 
     } catch (error) {
         console.log(error);

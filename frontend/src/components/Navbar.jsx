@@ -1,27 +1,94 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Home, Video, ShoppingBag, Users, Bell, Search, Grid } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "./ui/avatar";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
+import { BACKEND_URL } from "../../configURL";
+import { Input } from "./ui/input";
+import { toast } from "sonner";
 
 const Navbar = () => {
-    const navigate = useNavigate()
-    const { user } = useSelector(store => store.auth)
-    const { likeNotification } = useSelector(store => store.realTimeNotification)
+    const navigate = useNavigate();
+    const { user } = useSelector(store => store.auth);
     const dispatch = useDispatch();
-    const [open, setOpen] = useState(false)
+    const [inputSearch, setInputSearch] = useState("");
+    const [searchResults, setSearchResults] = useState([]);
+    const [loading, setLoading] = useState(false);
+
+    // Debounce effect to reduce API calls while typing
+    useEffect(() => {
+        const delay = setTimeout(() => {
+            if (inputSearch.trim()) {
+                fetchSearchResults(inputSearch);
+            } else {
+                setSearchResults([]);
+            }
+        }, 300); // Delay API call by 300ms
+
+        return () => clearTimeout(delay);
+    }, [inputSearch]);
+
+    const fetchSearchResults = async (query) => {
+        setLoading(true);
+        try {
+            const res = await axios.post(
+                `${BACKEND_URL}/api/v1/user/search`,
+                { searchRes: query },
+                {
+                    headers: { 'Content-Type': 'application/json' },
+                    withCredentials: true,
+                }
+            );
+            setSearchResults(res.data.searchResults);
+        } catch (error) {
+            toast.error("Error fetching users");
+            console.error(error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
     return (
-        <nav className="bg-white shadow-md p-3 flex items-center justify-between">
+        <nav className="bg-white shadow-md p-3 flex items-center justify-between relative">
             {/* Left Section: Logo and Search */}
             <div className="flex items-center space-x-3">
-                <div className="text-blue-600 text-3xl font-bold">F</div>
+                <img src="/fb.png" alt="logo" width={40} />
                 <div className="relative w-56 md:w-64">
                     <Search className="absolute left-3 top-2.5 text-gray-400" size={18} />
-                    <input
+                    <Input
                         type="text"
-                        placeholder="Search Facebook"
-                        className="bg-gray-100 rounded-full pl-10 pr-4 py-2 text-sm w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        placeholder="Search users..."
+                        value={inputSearch}
+                        onChange={(e) => setInputSearch(e.target.value)}
+                        className="w-64 border p-2 rounded-md pl-10"
                     />
+                    {/* Display Search Results */}
+                    {inputSearch.trim() && (
+                        <div className="absolute bg-white shadow-md mt-2 w-full max-h-60 overflow-y-auto border rounded-md z-20">
+                            {loading ? (
+                                <p className="text-gray-500 p-2">Loading...</p>
+                            ) : (
+                                searchResults.length > 0 ? (
+                                    searchResults.map((user) => (
+                                        <div
+                                            key={user._id}
+                                            className="flex items-center gap-3 p-2 hover:bg-gray-100 cursor-pointer"
+                                            onClick={() => navigate(`/profile/${user._id}`)}
+                                        >
+                                            <Avatar>
+                                                <AvatarImage src={user.profilePicture} />
+                                                <AvatarFallback>{user.username.charAt(0)}</AvatarFallback>
+                                            </Avatar>
+                                            <span className="font-medium">{user.username}</span>
+                                        </div>
+                                    ))
+                                ) : (
+                                    <p className="text-gray-500 p-2">No users found</p>
+                                )
+                            )}
+                        </div>
+                    )}
                 </div>
             </div>
 

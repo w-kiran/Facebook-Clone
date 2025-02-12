@@ -16,6 +16,6 @@ router.route('/changepassword').post(isAuth,changePassword)
 router.route('/deleteaccount').delete(isAuth,deleteAccount)
 router.route('/blockuser').post(isAuth,blockUsers)
 router.route('/mutualfriend').get(isAuth,mutualFriends)
-router.route('/search').get(isAuth,searchUsers)
+router.route('/search').post(isAuth,searchUsers)
 
 export default router

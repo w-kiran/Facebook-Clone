@@ -1,115 +1,94 @@
-import React, { useState } from 'react'
-import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar'
+import React, { useState } from 'react';
+import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 import useGetUserProfile from '@/hooks/useGetUserProfile';
 import { Link, useParams } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
-import { AtSign, Heart, MessageCircle } from 'lucide-react';
+import { AtSign, Heart, MessageCircle, Camera } from 'lucide-react';
 
 const Profile = () => {
   const params = useParams();
   const userId = params.id;
   useGetUserProfile(userId);
   const [activeTab, setActiveTab] = useState('posts');
-
   const { userProfile, user } = useSelector(store => store.auth);
-
   const isLoggedInUserProfile = user?._id === userProfile?._id;
-  const isFollowing = false;
+  const isFriends = false;
 
   const handleTabChange = (tab) => {
     setActiveTab(tab);
-  }
+  };
 
   const displayedPost = activeTab === 'posts' ? userProfile?.posts || [] : userProfile?.saved || [];
 
-
   return (
-    <div className='flex max-w-5xl justify-center mx-auto pl-10'>
-      <div className='flex flex-col gap-20 p-8'>
-        <div className='grid grid-cols-2'>
-          <section className='flex items-center justify-center'>
-            <Avatar className='h-32 w-32'>
-              <AvatarImage src={userProfile?.profilePicture} alt="profilephoto" />
-              <AvatarFallback>CN</AvatarFallback>
-            </Avatar>
-          </section>
-          <section>
-            <div className='flex flex-col gap-5'>
-              <div className='flex items-center gap-2'>
-                <span>{userProfile?.username}</span>
-                {
-                  isLoggedInUserProfile ? (
-                    <>
-                      <Link to="/account/edit"><Button variant='secondary' className='hover:bg-gray-200 h-8'>Edit profile</Button></Link>
-                      <Button variant='secondary' className='hover:bg-gray-200 h-8'>View archive</Button>
-                      <Button variant='secondary' className='hover:bg-gray-200 h-8'>Ad tools</Button>
-                    </>
-                  ) : (
-                    isFollowing ? (
-                      <>
-                        <Button variant='secondary' className='h-8'>Unfollow</Button>
-                        <Button variant='secondary' className='h-8'>Message</Button>
-                      </>
-                    ) : (
-                      <Button className='bg-[#0095F6] hover:bg-[#3192d2] h-8'>Follow</Button>
-                    )
-                  )
-                }
-              </div>
-              <div className='flex items-center gap-4'>
-                <p><span className='font-semibold'>{userProfile?.posts?.length} </span>posts</p>
-                <p><span className='font-semibold'>{userProfile?.friends?.length} </span>friends</p>
-              </div>
-              <div className='flex flex-col gap-1'>
-                <span className='font-semibold'>{userProfile?.bio || 'bio here...'}</span>
-                <Badge className='w-fit' variant='secondary'><AtSign /> <span className='pl-1'>{userProfile?.username}</span> </Badge>
-                <span>🤯Learn code with kiran</span>
-                <span>🤯Turning code into fun</span>
-                <span>🤯DM for collaboration</span>
-              </div>
-            </div>
-          </section>
-        </div>
-        <div className='border-t border-t-gray-200'>
-          <div className='flex items-center justify-center gap-10 text-sm'>
-            <span className={`py-3 cursor-pointer ${activeTab === 'posts' ? 'font-bold' : ''}`} onClick={() => handleTabChange('posts')}>
-              POSTS
-            </span>
-            <span className={`py-3 cursor-pointer ${activeTab === 'saved' ? 'font-bold' : ''}`} onClick={() => handleTabChange('saved')}>
-              SAVED
-            </span>
-            <span className='py-3 cursor-pointer'>REELS</span>
-            <span className='py-3 cursor-pointer'>TAGS</span>
-          </div>
-          <div className='grid grid-cols-3 gap-1'>
-            {
-              displayedPost?.map((posts) => {
-                return (
-                  <div key={posts?._id} className='relative group cursor-pointer'>
-                    <img src={posts.image} alt='postimage' className='rounded-sm my-2 w-full aspect-square object-cover' />
-                    <div className='absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity duration-300'>
-                      <div className='flex items-center text-white space-x-4'>
-                        <button className='flex items-center gap-2 hover:text-gray-300'>
-                          <Heart />
-                          <span>{posts?.reactions.length}</span>
-                        </button>
-                        <button className='flex items-center gap-2 hover:text-gray-300'>
-                          <MessageCircle />
-                          <span>{posts?.comments.length}</span>
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                )
-              })
-            }
-          </div>
+    <div className='flex flex-col items-center w-full h-screen flex-grow bg-gray-100'>
+      {/* Cover Photo */}
+      <div className='relative w-full h-[60%] '>
+        <img src={userProfile?.coverPhoto} alt='cover' className='w-[80%] h-[100%] object-center ml-[10%] rounded-lg' />
+        {isLoggedInUserProfile && (
+          <button className='absolute bottom-4 right-4 bg-white p-2 rounded-full shadow-md'>
+            <Camera size={20} />
+          </button>
+        )}
+      </div>
+
+      {/* Profile Section */}
+      <div className='flex flex-col w-full max-w-5xl bg-white p-6 shadow-md -mt-16 rounded-lg'>
+        <Avatar className='h-32 w-32 border-4 border-white shadow-lg'>
+          <AvatarImage src={userProfile?.profilePicture} alt='profile' />
+          <AvatarFallback>CN</AvatarFallback>
+        </Avatar>
+        <h2 className='text-2xl font-bold mt-2'>{userProfile?.username}</h2>
+        <p className='text-gray-500'>{userProfile?.friends?.length} friends</p>
+        <div className='mt-4 flex gap-2'>
+          {isLoggedInUserProfile ? (
+            <>
+              <Link to='/account/edit'><Button variant='secondary'>Edit Profile</Button></Link>
+              <Button variant='secondary'>View Archive</Button>
+            </>
+          ) : (
+            isFriends ? (
+              <Button variant='secondary'>Unfriend</Button>
+            ) : (
+              <Button className='bg-blue-500 text-white'>Add friend</Button>
+            )
+          )}
         </div>
       </div>
-    </div>
-  )
-}
 
-export default Profile
+      {/* Tabs */}
+      <div className='w-full max-w-5xl mt-6'>
+        <div className='flex justify-center gap-10 border-b py-3 text-gray-600'>
+          {['posts', 'about', 'friends', 'photos', 'videos'].map(tab => (
+            <span 
+              key={tab} 
+              className={`cursor-pointer ${activeTab === tab ? 'font-bold border-b-2 border-black' : ''}`} 
+              onClick={() => handleTabChange(tab)}
+            >
+              {tab.toUpperCase()}
+            </span>
+          ))}
+        </div>
+      </div>
+
+      {/* Posts Section */}
+      <div className='grid grid-cols-3 gap-4 max-w-5xl mt-6'>
+        {displayedPost.map(post => (
+          <div key={post._id} className='relative group cursor-pointer'>
+            <img src={post.image} alt='post' className='rounded-md w-full aspect-square object-cover' />
+            <div className='absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity'>
+              <div className='flex items-center text-white space-x-4'>
+                <button className='flex items-center gap-2'><Heart /><span>{post.reactions.length}</span></button>
+                <button className='flex items-center gap-2'><MessageCircle /><span>{post.comments.length}</span></button>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+export default Profile;

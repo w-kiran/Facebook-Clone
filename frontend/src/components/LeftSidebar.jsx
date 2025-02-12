@@ -18,7 +18,6 @@ const LeftSidebar = () => {
     const { user } = useSelector(store => store.auth)
     const { likeNotification } = useSelector(store => store.realTimeNotification)
     const dispatch = useDispatch();
-    const [open, setOpen] = useState(false)
 
     const logoutHandler = async () => {
         try {
@@ -38,9 +37,7 @@ const LeftSidebar = () => {
     const sidebarHandler = (textType) => {
         if (textType == 'Logout') {
             logoutHandler()
-        } else if (textType === "Create") {
-            setOpen(true)
-        } else if (textType === "Profile") {
+        } else if (textType === `${user?.username}`) {
             navigate(`/profile/${user?._id}`)
             console.log(user._id);
             
@@ -58,14 +55,13 @@ const LeftSidebar = () => {
                     <AvatarImage src={user?.profilePicture} />
                     <AvatarFallback>CN</AvatarFallback>
                 </Avatar>
-            ), text: `Profile`
+            ), text: `${user?.username}`
         },
         { icon: <Home />, text: "Home" },
         { icon: <Search />, text: "Search" },
         { icon: <TrendingUp />, text: "TrendingUp" },
         { icon: <MessageCircle />, text: "Messages" },
         { icon: <Heart />, text: "Notifications" },
-        { icon: <PlusSquare />, text: "Create" },
         { icon: <LogOut />, text: "Logout" },
     ]
     return (
@@ -112,7 +108,6 @@ const LeftSidebar = () => {
                     }
                 </div>
             </div>
-
         </div>
     )
 }

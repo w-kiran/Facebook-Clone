@@ -4,9 +4,9 @@ import Navbar from './Navbar.jsx'
 
 const MainLayout = () => {
   return (
-    <div>
+    <div className='flex flex-col min-h-screen'>
       <Navbar/>
-      <div>
+      <div className="flex-grow">
         <Outlet/>
       </div>
     </div>
