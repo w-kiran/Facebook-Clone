@@ -169,86 +169,183 @@ const Post = ({ post }) => {
         }
     }
 
-    return (
-        <Card className="my-10 w-full max-w-xl mx-auto border shadow-sm rounded-lg overflow-hidden">
-            {/* Post Header */}
-            <div className="flex items-center justify-between p-3">
-                <div className="flex items-center gap-3">
-                    <Avatar>
-                        <AvatarImage src={post.author?.profilePicture} alt="profile_image" />
-                        <AvatarFallback>CN</AvatarFallback>
-                    </Avatar>
-                    <div className="flex flex-col">
-                        <h1 className="font-semibold flex items-center gap-1">
-                            {post.author?.username} <span className="text-blue-500">✔</span>
-                        </h1>
-                        <span className="text-gray-500 text-sm">{post.time}</span>
+    if (!post.originalPost) {
+        return (
+            <Card className="my-10 w-full max-w-xl mx-auto border shadow-sm rounded-lg overflow-hidden">
+                {/* Post Header */}
+                <div className="flex items-center justify-between pt-3 pl-3 pr-3">
+                    <div className="flex items-center gap-3">
+                        <Avatar>
+                            <AvatarImage src={post.author?.profilePicture} alt="profile_image" />
+                            <AvatarFallback>CN</AvatarFallback>
+                        </Avatar>
+                        <div className="flex flex-col">
+                            <h1 className="font-semibold flex items-center gap-1">
+                                {post.author?.username}
+                            </h1>
+                            <span className="text-gray-500 text-sm">{post.time}</span>
+                        </div>
                     </div>
+                    <MoreHorizontal className="cursor-pointer text-gray-600" />
                 </div>
-                <MoreHorizontal className="cursor-pointer text-gray-600" />
-            </div>
 
-            {/* Post Content */}
-            <p className="px-3 text-sm text-gray-800">{post.caption}</p>
+                {/* Post Content */}
+                {post.caption && <p className="p-3 text-sm text-gray-800">{post.caption}</p>}
 
-            {/* Post Image */}
-            {post.image && <img className="w-full mt-2" src={post.image} alt="post_img" />}
+                {/* Post Image */}
+                {post.image && <img className="w-full" src={post.image} alt="post_img" />}
 
-            {/* Engagement Counts */}
-            <div className="flex justify-between items-center text-gray-600 text-sm mt-1 mb-1 px-2">
-                <div className="flex items-center gap-1">
-                    {selectedReaction ? selectedReaction.icon : <FaThumbsUp className="text-blue-500" />}
-                    <span>{postReactCount}</span>
-                </div>
-                <div>
-                    <span onClick={() => {
-                        dispatch(setSelectedPost(post));
-                        setOpen(true);
-                    }} className='cursor-pointer text-sm '>{post.comments.length} comments</span> • <span>682 shares</span>
-                </div>
-            </div>
-
-
-            {/* Engagement Bar */}
-            <div className="flex items-center justify-center text-gray-600 text-sm font-medium border h-10">
-                {/* Like Button with Reaction Popup on Hover */}
-                <div className="relative flex flex-col justify-center items-center w-1/3 h-full cursor-pointer border-r hover:bg-gray-100 group">
-                    <div className="flex items-center gap-2">
-                        <FaThumbsUp />
-                        <span>{selectedReaction ? selectedReaction.name : 'Like'}</span>
+                {/* Engagement Counts */}
+                <div className="flex justify-between items-center text-gray-600 text-sm mt-1 mb-1 px-2">
+                    <div className="flex items-center gap-1">
+                        {selectedReaction ? selectedReaction.icon : <FaThumbsUp className="text-blue-500" />}
+                        <span>{postReactCount}</span>
                     </div>
-                    {/* Reaction Popup */}
-                    <div
-                        className="absolute top-[-48px] transform translate-x-[23%] flex bg-white shadow-md rounded-full px-4 py-2 space-x-3 border opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-                    >
-                        {reactions.map((reaction) => (
-                            <div
-                                key={reaction.name}
-                                className="cursor-pointer p-2 transition-all hover:scale-125 h-full w-full"
-                                onClick={() => toggleReactionHandler(reaction)}
-                            >
-                                {reaction.icon}
-                            </div>
-                        ))}
+                    <div>
+                        <span onClick={() => {
+                            dispatch(setSelectedPost(post));
+                            setOpen(true);
+                        }} className='cursor-pointer text-sm '>{post.comments.length} comments</span> • <span>682 shares</span>
                     </div>
                 </div>
 
-                {/* Comment Button */}
-                <div onClick={() => setOpen(true)} className="flex justify-center items-center gap-2 cursor-pointer w-1/3 h-full border-r hover:bg-gray-100">
-                    <FaRegComment />
-                    <span>Comment</span>
+
+                {/* Engagement Bar */}
+                <div className="flex items-center justify-center text-gray-600 text-sm font-medium border h-10">
+                    {/* Like Button with Reaction Popup on Hover */}
+                    <div className="relative flex flex-col justify-center items-center w-1/3 h-full cursor-pointer border-r hover:bg-gray-100 group">
+                        <div className="flex items-center gap-2">
+                            <FaThumbsUp />
+                            <span>{selectedReaction ? selectedReaction.name : 'Like'}</span>
+                        </div>
+                        {/* Reaction Popup */}
+                        <div
+                            className="absolute top-[-48px] transform translate-x-[23%] flex bg-white shadow-md rounded-full px-4 py-2 space-x-3 border opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                        >
+                            {reactions.map((reaction) => (
+                                <div
+                                    key={reaction.name}
+                                    className="cursor-pointer p-2 transition-all hover:scale-125 h-full w-full"
+                                    onClick={() => toggleReactionHandler(reaction)}
+                                >
+                                    {reaction.icon}
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Comment Button */}
+                    <div onClick={() => setOpen(true)} className="flex justify-center items-center gap-2 cursor-pointer w-1/3 h-full border-r hover:bg-gray-100">
+                        <FaRegComment />
+                        <span>Comment</span>
+                    </div>
+
+                    {/* Share Button */}
+                    <div className="flex items-center justify-center gap-2 cursor-pointer w-1/3 h-full hover:bg-gray-100">
+                        <FaShare />
+                        <span>Share</span>
+                    </div>
+                </div>
+                <CommentDialog open={open} setOpen={setOpen} />
+            </Card>
+        );
+    }
+    else {
+        return (
+            <Card className="my-10 w-full max-w-xl mx-auto border shadow-sm rounded-lg overflow-hidden">
+                {/* Post Header */}
+                <div className="flex items-center justify-between pt-3 pl-3 pr-3">
+                    <div className="flex items-center gap-3">
+                        <Avatar>
+                            <AvatarImage src={post.author?.profilePicture} alt="profile_image" />
+                            <AvatarFallback>CN</AvatarFallback>
+                        </Avatar>
+                        <div className="flex flex-col">
+                            <h1 className="font-semibold flex items-center gap-1">
+                                {post.author?.username}
+                            </h1>
+                            <span className="text-gray-500 text-sm">{post.time}</span>
+                        </div>
+                    </div>
+                    <MoreHorizontal className="cursor-pointer text-gray-600" />
                 </div>
 
-                {/* Share Button */}
-                <div className="flex items-center justify-center gap-2 cursor-pointer w-1/3 h-full hover:bg-gray-100">
-                    <FaShare />
-                    <span>Share</span>
+                {/* Post Content */}
+                {post.caption && <p className="p-3 text-sm text-gray-800">{post.caption}</p>}
+
+                <div className='border rounded-xl m-2'>
+                    {post.originalPost.image && <img className="w-full rounded-t-xl" src={post.originalPost.image} alt="post_img" />}
+                    {post.originalPost.author.username && <div className="flex items-center gap-3">
+                        <Avatar>
+                            <AvatarImage src={post.originalPost.author?.profilePicture} alt="profile_image" />
+                            <AvatarFallback>CN</AvatarFallback>
+                        </Avatar>
+                        <div className="flex flex-col">
+                            <h1 className="font-semibold flex items-center gap-1">
+                                {post.originalPost.author?.username}
+                            </h1>
+                        </div>
+
+                    </div>}<p className="px-3 text-sm text-gray-800">{post.originalPost.caption}</p>
                 </div>
-            </div>
-            <CommentDialog open={open} setOpen={setOpen} />
-        </Card>
-    );
-};
+
+
+                {/* Engagement Counts */}
+                <div className="flex justify-between items-center text-gray-600 text-sm mt-1 mb-1 px-2">
+                    <div className="flex items-center gap-1">
+                        {selectedReaction ? selectedReaction.icon : <FaThumbsUp className="text-blue-500" />}
+                        <span>{postReactCount}</span>
+                    </div>
+                    <div>
+                        <span onClick={() => {
+                            dispatch(setSelectedPost(post));
+                            setOpen(true);
+                        }} className='cursor-pointer text-sm '>{post.comments.length} comments</span> • <span>682 shares</span>
+                    </div>
+                </div>
+
+
+                {/* Engagement Bar */}
+                <div className="flex items-center justify-center text-gray-600 text-sm font-medium border h-10">
+                    {/* Like Button with Reaction Popup on Hover */}
+                    <div className="relative flex flex-col justify-center items-center w-1/3 h-full cursor-pointer border-r hover:bg-gray-100 group">
+                        <div className="flex items-center gap-2">
+                            <FaThumbsUp />
+                            <span>{selectedReaction ? selectedReaction.name : 'Like'}</span>
+                        </div>
+                        {/* Reaction Popup */}
+                        <div
+                            className="absolute top-[-48px] transform translate-x-[23%] flex bg-white shadow-md rounded-full px-4 py-2 space-x-3 border opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                        >
+                            {reactions.map((reaction) => (
+                                <div
+                                    key={reaction.name}
+                                    className="cursor-pointer p-2 transition-all hover:scale-125 h-full w-full"
+                                    onClick={() => toggleReactionHandler(reaction)}
+                                >
+                                    {reaction.icon}
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Comment Button */}
+                    <div onClick={() => setOpen(true)} className="flex justify-center items-center gap-2 cursor-pointer w-1/3 h-full border-r hover:bg-gray-100">
+                        <FaRegComment />
+                        <span>Comment</span>
+                    </div>
+
+                    {/* Share Button */}
+                    <div className="flex items-center justify-center gap-2 cursor-pointer w-1/3 h-full hover:bg-gray-100">
+                        <FaShare />
+                        <span>Share</span>
+                    </div>
+                </div>
+                <CommentDialog open={open} setOpen={setOpen} />
+            </Card>
+        );
+    };
+}
 
 //         <div className='my-10 w-full max-w-sm mx-auto border h-auto'>
 //             {/* Post Header */}
