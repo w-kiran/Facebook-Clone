@@ -12,6 +12,5 @@ const userSchema = new mongoose.Schema({
     posts:[{type:mongoose.Schema.Types.ObjectId ,ref:"Post"}],
     saved:[{type:mongoose.Schema.Types.ObjectId ,ref:"Post"}],
     blockedUsers:[{type:mongoose.Schema.Types.ObjectId ,ref:"User"}],
-    // sharedPost:[{type:mongoose.Schema.Types.ObjectId ,ref:"Post"}]
 })
 export const User = mongoose.model("User",userSchema)

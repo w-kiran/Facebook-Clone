@@ -50,7 +50,7 @@ const Navbar = () => {
     };
 
     return (
-        <nav className="bg-white shadow-md p-3 flex items-center justify-between relative">
+        <nav className="bg-white shadow-md p-3 flex items-center justify-between sticky top-0 z-50">
             {/* Left Section: Logo and Search */}
             <div className="flex items-center space-x-3">
                 <img src="/fb.png" alt="logo" width={40} />

@@ -429,7 +429,7 @@ export const sharePost = async (req, res) => {
     try {
         const userId = req.id;
         const postId = req.params.id;
-        const { caption } = req.body;
+        const { caption,visibility } = req.body;
 
         const post = await Post.findById(postId);
 
@@ -440,17 +440,20 @@ export const sharePost = async (req, res) => {
             });
         }
 
+
         let user = await User.findById(userId);
 
         // Create a new post with the shared post reference
         const newSharedPost = await Post.create({
-            caption: caption || "",
+            caption: caption,
+            visibility: visibility,
             author: userId,
             originalPost: postId, // Store the original post reference
         });
 
         // Update user document with shared post
         await user.updateOne({ $addToSet: { posts: newSharedPost._id } });
+        await user.save()
 
         // Populate sharedPost to return updated data
         // await user.populate({
@@ -473,6 +476,7 @@ export const sharePost = async (req, res) => {
         return res.status(200).json({
             message: "Post shared successfully",
             success: true,
+            sharedPost: newSharedPost, 
         });
 
     } catch (error) {
