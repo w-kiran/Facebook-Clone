@@ -284,7 +284,7 @@ export const friendOrUnfriend = async (req, res) => {
         }
 
         const user = await User.findById(Me)
-        const targetUser = await User.findById(FriendTarget)
+        const targetUser = await User.findById(FriendTargetId)
 
         if (!user || !targetUser) {
             return res.status(400).json({
@@ -293,7 +293,7 @@ export const friendOrUnfriend = async (req, res) => {
             });
         }
 
-        const isFriend = user.friends.includes(FriendTarget)
+        const isFriend = user.friends.includes(FriendTargetId)
         if (isFriend) {
             await Promise.all([
                 User.updateOne({ _id: Me }, { $pull: { friends: targetUser } }),

@@ -15,6 +15,7 @@ import { Badge } from './ui/badge'
 import { BACKEND_URL } from '../../configURL'
 import { Card } from './ui/card'
 import ShareDialog from './ShareDialog'
+import { useNavigate } from 'react-router-dom'
 
 
 const reactions = [
@@ -39,6 +40,7 @@ const Post = ({ post }) => {
     const [selectedReaction, setSelectedReaction] = useState(null);  // Track selected reaction directly
     const [comment, setComment] = useState(post.comments);
     const dispatch = useDispatch();
+    const navigate  = useNavigate()
 
     const handleInputChange = (e) => {
         setText(e.target.value.trim() ? e.target.value : "");
@@ -88,7 +90,7 @@ const Post = ({ post }) => {
         try {
             const res = await axios.delete(`${BACKEND_URL}/api/v1/post/delete/${selectedPost?._id}`, { withCredentials: true })
             if (res.data.success) {
-                const updatedPostData = posts.filter((postItem) => postItem?._id !== post?._id);
+                const updatedPostData = posts.filter((postItem) => postItem?._id !== selectedPost?._id);
                 dispatch(setPosts(updatedPostData));
                 toast.success(res.data.message);
             }
@@ -134,7 +136,7 @@ const Post = ({ post }) => {
                             <div className='absolute flex flex-col right-2 items-center ml-4
                      top-14 bg-white shadow-md  w-2/3  border rounded-md z-20 gap-2 my-2 cursor-pointer'>
                                 <h2 className='mt-2'>Post Options</h2>
-                                <h2 onClick={() => deletePostHandler}
+                                <h2 onClick={deletePostHandler}
                                     className='flex items-center mr-1'><RiDeleteBin6Line className='mr-1' />Delete Post</h2>
                                 <h2 className='flex  items-center '> <IoBookmarkOutline className='mr-1' />Saved Post</h2>
 
@@ -155,7 +157,7 @@ const Post = ({ post }) => {
                 {post.caption && <p className="p-3 text-sm text-gray-800">{post.caption}</p>}
 
                 {/* Post Image */}
-                {post.image && <img className="w-full border" src={post.image} alt="post_img" />}
+                {post.image && <img className="w-full border object-cover max-h-[700px]" src={post.image} alt="post_img" />}
 
                 {/* Engagement Counts */}
                 <div className="flex justify-between items-center text-gray-600 text-sm mt-1 mb-1 px-2">
@@ -197,7 +199,9 @@ const Post = ({ post }) => {
                     </div>
 
                     {/* Comment Button */}
-                    <div onClick={() => setOpen(true)} className="flex justify-center items-center gap-2 cursor-pointer w-1/3 h-full border-r hover:bg-gray-100">
+                    <div onClick={() => {setOpen(true),
+                        dispatch(setSelectedPost(post))
+                    }} className="flex justify-center items-center gap-2 cursor-pointer w-1/3 h-full border-r hover:bg-gray-100">
                         <FaRegComment />
                         <span>Comment</span>
                     </div>

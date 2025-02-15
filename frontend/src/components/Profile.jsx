@@ -2,20 +2,21 @@ import React, { useEffect, useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import blankcover from "../assets/blankcoverpic.png";
+import { RiDeleteBin6Line } from "react-icons/ri";
 import blankprofilepic from "../assets/blankprofilepic.png";
 import { useDispatch, useSelector } from "react-redux";
 import { Button } from "./ui/button";
 import { IoBookmarkOutline } from "react-icons/io5";
 import { Camera, MoreHorizontal } from "lucide-react";
 import Post from "./Post";
-import { setSelectedPost } from "../../store/postSlice";
 import EditProfile from "./EditProfile";
-import useGetUserProfile from "@/hooks/useGetUserProfile";
 import CreatePost from "./CreatePost";
 import axios from "axios";
 import { toast } from "sonner";
-import { setAuthUser, setUserProfile } from "../../store/authSlice";
+import useGetUserProfile from "@/hooks/useGetUserProfile";
 import { BACKEND_URL } from "../../configURL";
+import { setPosts, setSelectedPost } from "@/redux/postSlice";
+import { setAuthUser, setUserProfile } from "@/redux/authSlice";
 
 const Profile = () => {
   const navigate = useNavigate();
@@ -24,29 +25,26 @@ const Profile = () => {
   useGetUserProfile(userId);
   const [activeTab, setActiveTab] = useState("posts");
   const { userProfile, user } = useSelector((store) => store.auth);
+  const { selectedPost } = useSelector((store) => store.post);
   const isLoggedInUserProfile = user?._id === userProfile?._id;
-  const [isFriend, setIsFriend] = useState(false);
   const [displayTab, setDisplayTab] = useState([]);
   const [bio, SetBio] = useState("");
   const [threeDot, setThreeDot] = useState(false);
   const dispatch = useDispatch();
   const [open, setOpen] = useState(false);
-
-  const isFriendorNot = () => {
-    if (user?.freinds?.includes(userProfile._id)) {
-      setIsFriend(true);
-      console.log("isfriends ", isFriend);
-      console.log("isfriend", isFriend);
-    } else {
-      setIsFriend(false);
-      console.log("isfriend", isFriend);
-    }
-  };
+  console.log(isLoggedInUserProfile);
+  const [isFriend, setIsFriend] = useState(
+    user?.friends?.includes(userProfile._id)
+  );
 
   useEffect(() => {
     setDisplayTab(userProfile?.posts || []);
-    isFriendorNot();
-  }, [userProfile?.posts, user]);
+    // if (user._id === userProfile._id) {
+    //   setActiveTab((prevTab) => prevTab || "saved");
+    // } else {
+    //   setActiveTab("posts");
+    // }
+  }, [userProfile]);
 
   const handleTabChange = (tab) => {
     setActiveTab(tab);
@@ -67,17 +65,42 @@ const Profile = () => {
     setDisplayTab(newDisplayTab);
   };
 
+  const friendReqHandler = async () => {
+    try {
+      const res = await axios.get(
+        `${BACKEND_URL}/api/v1/user/friendorunfriend/${userId}`,
+        { withCredentials: true }
+      );
+
+      if (res.data.success) {
+        dispatch(setAuthUser(res.data.user));
+        dispatch(setUserProfile(res.data.targetUser));
+
+        // setIsFriend(res.data.user.friends.includes(userId));
+        setIsFriend(!isFriend);
+        toast.success(res.data.message);
+      }
+    } catch (error) {
+      setIsFriend((prev) => !prev);
+      toast.error(error?.response?.data?.message);
+      console.log(error);
+    }
+  };
+
+  if (!userProfile && !user) {
+    return <p>Loading...</p>;
+  }
   const deletePostHandler = async () => {
     try {
       const res = await axios.delete(
-        `${BACKEND_URL}/api/v1/post/delete/${selected._id}`,
+        `${BACKEND_URL}/api/v1/post/delete/${selectedPost._id}`,
         { withCredentials: true }
       );
       if (res.data.success) {
-        const updatedPostData = posts.filter(
-          (postItem) => postItem?._id !== post?._id
+        const updatedPostData = user.posts.filter(
+          (postItem) => postItem?._id !== selectedPost?.id
         );
-        dispatch(setAllpost(updatedPostData));
+        dispatch(setPosts(updatedPostData));
         toast.success(res.data.message);
       }
     } catch (error) {
@@ -85,37 +108,24 @@ const Profile = () => {
       toast.error(error?.response?.data?.messsage);
     }
   };
-  const bookmarkHandler = async () => {
+
+  if (!userProfile || Object.keys(userProfile).length === 0) {
+    return <div>Failed to load user profile.</div>;
+  }
+
+  const savedHandler = async()=>{
     try {
-      const res = await axios.get(
-        `${backendurl}/api/v1/post/${selectedpost._id}/savepost`,
-        { withCredentials: true }
-      );
-      if (res.data.success) {
+      const res = await axios.get(`${BACKEND_URL}/api/v1/post/${selectedPost._id}/savepost`,{
+        withCredentials:true
+      })
+      if(res.data.success){
         toast.success(res.data.message);
+          dispatch(setChangeSaved(res.data.savedPost))
       }
     } catch (error) {
-      console.log(error);
-      toast.error(error.response.data.message);
+      console.log(error)
     }
-  };
-  const friendReqHandler = async () => {
-    try {
-      const res = await axios.get(
-        `${backendurl}/api/v1/user/${userId}/friendorunfreind`,
-        {
-          withCredentials: true,
-        }
-      );
-      if (res.data.success) {
-        isFriendorNot();
-        toast.success(res.data.message);
-      }
-    } catch (error) {
-      toast.error(error?.data?.response?.message);
-      console.log(error);
-    }
-  };
+  }
 
   return (
     <div className="flex flex-col items-center w-full h-screen flex-grow relative ">
@@ -135,7 +145,7 @@ const Profile = () => {
           />
         )}
         {isLoggedInUserProfile && (
-          <button className="absolute bottom-4 right-4 bg-white p-2 rounded-full shadow-md">
+          <button className="absolute bottom-8 right-[17%] bg-white p-2 rounded-full shadow-md">
             <Camera size={20} />
           </button>
         )}
@@ -163,28 +173,24 @@ const Profile = () => {
         </div>
         <div className="mt-14 ml-6 flex gap-2">
           {isLoggedInUserProfile ? (
-            <>
-              <Button onClick={() => setOpen(!open)} variant="secondary">
-                Edit Profile
-              </Button>
-            </>
-          ) : isFriend ? (
-            <Button onClick={friendReqHandler} variant="secondary">
-              Remove Friend
+            <Button onClick={() => setOpen(!open)} variant="secondary">
+              Edit Profile
             </Button>
           ) : (
             <Button
               onClick={friendReqHandler}
-              className="bg-blue-500 text-white"
+              className={
+                isFriend ? "bg-gray-500 text-white" : "bg-blue-500 text-white"
+              }
             >
-              Send Friend
+              {isFriend ? "Remove Friend" : "Send Friend"}
             </Button>
           )}
         </div>
       </div>
 
       {/* Tabs */}
-      <div className="w-full max-w-5xl mt-6">
+      <div className="w-full max-w-5xl mt-6 ">
         <div className="flex justify-center gap-10 border-b py-3 text-gray-600">
           {["posts", "about", "friends", "photos", "videos", "saved"].map(
             (tab) => (
@@ -202,22 +208,24 @@ const Profile = () => {
         </div>
       </div>
 
-      <div className="flex p-2 bg-gray-300 w-2/3 gap-4">
+      <div className="flex p-2 bg- w-2/3 gap-4 ">
         {/* Sidebar */}
-        <div className="flex flex-col w-[22%] border rounded-md  bg-gray-100 p-2">
+        <div className="flex flex-col w-[22%] border rounded-md  min-h-[200px] max-h-[400px]  p-2">
           <h2 className="font-semibold text-xl ">Intro</h2>
           <div className="flex flex-col items-center gap-2">
             <h3 className="mt-2">{userProfile?.username}</h3>
-            <button
-              type="button"
-              className="px-6 w-full bg-gray-200 border rounded-md"
-              onClick={() => setOpen(!open)}
-            >
-              Edit Profile
-            </button>
+            {user?._id === userProfile._id && (
+              <Button
+                className="w-full"
+                onClick={() => setOpen(!open)}
+                variant="secondary"
+              >
+                Edit Profile
+              </Button>
+            )}
           </div>
           {userProfile && userProfile.gender && (
-            <p> Gender : {userProfile?.gender}</p>
+            <p className="mt-4"> Gender : {userProfile?.gender}</p>
           )}
 
           {user?.bio && (
@@ -232,21 +240,23 @@ const Profile = () => {
         <div className="flex-1 bg-white">
           {activeTab === "photos" && (
             <div className="grid grid-cols-3 gap-4">
-              {displayTab.map((post) => (
-                <div key={post._id} className="relative group cursor-pointer">
-                  <img
-                    src={post.image}
-                    alt="post"
-                    className="rounded-md w-full object-cover"
-                  />
-                </div>
-              ))}
+              {displayTab
+                .filter((post) => post.image)
+                .map((post) => (
+                  <div key={post._id} className="relative group cursor-pointer">
+                    <img
+                      src={post.image}
+                      alt="post"
+                      className="rounded-md w-full object-cover"
+                    />
+                  </div>
+                ))}
             </div>
           )}
 
           {activeTab === "posts" && displayTab.length > 0 && (
             <div className="flex flex-col w-full mt-2">
-              {user._id === userProfile._id && <CreatePost />}
+              {user?._id === userProfile?._id && <CreatePost />}
               {displayTab.map((post) => (
                 <Post key={post._id} post={post} />
               ))}
@@ -258,7 +268,7 @@ const Profile = () => {
               {displayTab.map((post) => (
                 <div
                   key={post._id}
-                  className="flex justify-between cursor-pointer relative border rounded-md bg-slate-50 "
+                  className="flex justify-between cursor-pointer relative border rounded-md bg-slate-50 mb-2 "
                 >
                   <div className="flex items-center">
                     <img
@@ -281,7 +291,7 @@ const Profile = () => {
                                           top-14 bg-white shadow-md  w-2/3  border rounded-md z-20 gap-2 my-2 cursor-pointer"
                     >
                       <h2 className="mt-2">Post Options</h2>
-                      {post.author._id === user._id && (
+                      {post.author._id === user?._id && (
                         <h2
                           onClick={deletePostHandler}
                           className="flex items-center mr-1"
@@ -290,18 +300,14 @@ const Profile = () => {
                           Delete Post
                         </h2>
                       )}
-                      <h2
-                        onClick={bookmarkHandler}
-                        className="flex  items-center "
-                      >
-                        {" "}
-                        <IoBookmarkOutline className="mr-1" />
-                        Saved Post
-                      </h2>
 
                       <h2
                         className="mb-2 flex items-center "
-                        onClick={() => navigate(`/profile/${post.author._id}`)}
+                        onClick={() => {
+                          navigate(`/profile/${post.author._id}`);
+                          setThreeDot(!threeDot);
+                          setActiveTab("posts");
+                        }}
                       >
                         <Avatar className="mr-2 h-4 w-4">
                           <AvatarImage src={post.author.profilePicture} />
@@ -309,6 +315,15 @@ const Profile = () => {
                         </Avatar>{" "}
                         View Profile
                       </h2>
+
+                   {
+                    user._id === userProfile._id && 
+                    <h2 className="mb-2 flex items-center" onClick={savedHandler}>
+                    <IoBookmarkOutline className="mr-1"/>
+                    Remove from saved
+                       </h2>
+                   }
+
                     </div>
                   )}
                 </div>
@@ -336,6 +351,37 @@ const Profile = () => {
                   <p className="text-gray-700">{userProfile.bio}</p>
                 </div>
               )}
+            </div>
+          )}
+
+          {activeTab === "friends" && (
+            <div className="flex flex-col my-2 ">
+              {displayTab.map((friend) => (
+                <div
+                  className="hover:bg-gray-100 cursor-pointer  flex items-center justify-between gap-4 p-4"
+                  key={friend._id}
+                  onClick={() => navigate(`/profile/${friend._id}`)}
+                >
+                  <div className="ml-10">
+                    <Avatar className="w-16 h-16 ">
+                      <AvatarImage
+                        className="w-full h-full object-cover"
+                        src={friend?.profilePicture}
+                        alt={friend?.username}
+                      />
+                      <AvatarFallback>
+                        {friend.username.charAt(0)}
+                      </AvatarFallback>
+                    </Avatar>
+                  </div>
+                  <span className="font-medium mr-6">
+                    {friend?.bio?.length > 50
+                      ? friend.bio.slice(0, 50) + "..."
+                      : friend?.bio}
+                  </span>
+                  <span className="font-medium mr-16">{friend?.username}</span>
+                </div>
+              ))}
             </div>
           )}
         </div>

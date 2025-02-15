@@ -38,7 +38,7 @@ const LeftSideBar = () => {
     ];
     const sidebarHandler = (text) => {
         switch (text) {
-            case `${user.username}`:
+            case `${user?.username}`:
                 navigate(`/profile/${user._id}`);
                 break;
             case "Findfriends":
