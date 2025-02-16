@@ -123,7 +123,7 @@ export const getProfile = async (req, res) => {
         const Me = await User.findById(myId)
         const userId = req.params.id;
         let user = await User.findById(userId)
-        
+
         if (Me.blockedUsers.includes(userId)) {
             return res.status(401).json({
                 message: "User blocked",
@@ -160,7 +160,22 @@ export const getProfile = async (req, res) => {
                             path: "author",
                             select: "username profilePicture"
                         }
-                    }
+                    },{
+                        path: "originalPost", 
+                        populate: [
+                          { path: "author", select: "username profilePicture" },
+                          {
+                            path: "comments",
+                            options: { sort: { createdAt: -1 } },
+                            populate: { path: "author", select: "username profilePicture" },
+                          },
+                          {
+                            path: "reactions",
+                            options: { sort: { createdAt: -1 } },
+                            populate: { path: "author", select: "username profilePicture" },
+                          },
+                        ],
+                      },
                 ]
             },
             {
@@ -203,44 +218,121 @@ export const getProfile = async (req, res) => {
     }
 }
 
-export const editProfile = async (req, res) => {
+// export const editProfile = async (req, res) => {
+//     try {
+//         const userId = req.id;
+//         const user = await User.findById(userId);
+//         const { bio, gender, oldPassword } = req.body;
+//         let { newPassword } = req.body;
+
+//         const profilePicture = req.files?.profilePicture?.[0]; // Extract first file
+//         const coverPhoto = req.files?.coverPhoto?.[0]; // Extract first file
+
+//         if (!user) {
+//             return res.status(404).json({ success: false, message: "User not found" });
+//         }
+
+//         if (bio) {
+//             user.bio = bio;
+//         }
+//         if (gender) {
+//             user.gender = gender;
+//         }
+//         if (profilePicture) {
+//             const fileUri = getDataUri(profilePicture)
+//             const cloud_response = await cloudinary.uploader.upload(fileUri)
+//             user.profilePicture = cloud_response.secure_url;
+//         }
+//         if (coverPhoto) {
+//             const fileUri = getDataUri(coverPhoto)
+//             const cloud_response = await cloudinary.uploader.upload(fileUri)
+//             user.coverPhoto = cloud_response.secure_url;
+//         }
+
+//         if(!oldPassword || !newPassword){
+//             return res.status(401).json({
+//                 message:"jksfuksfn",
+//                 success: false
+//             })
+//         }
+//         if (oldPassword && newPassword) {
+//             const isPasswordMatch = await bcrypt.compare(oldPassword, user.password)
+//             if (!isPasswordMatch) {
+//                 return res.status(401).json({
+//                     message: "Password incorrect",
+//                     success: false
+//                 })
+//             }
+//         } else {
+//             const hashedPassword = await bcrypt.hash(newPassword, 10)
+//             user.password = hashedPassword;
+//         }
+//         await user.save();
+//         const updatedUser = await User.findById(user._id).select("-password")
+//         return res.status(200).json({
+//             message: "profile updated successfully!",
+//             success: true,
+//             user:updatedUser
+//         });
+//     } catch (error) {
+//         console.log(error);
+//     }
+// }
+
+export const editProfile = async(req,res)=>{
     try {
-        const userId = req.id;
-        const user = await User.findById(userId);
-        const { bio, gender } = req.body;
+    const userId = req.id;
+    const user = await User.findById(userId);
+    const { bio , gender , oldPassword } = req.body;
+    let { newPassword } = req.body;
+    const profilePicture = req.files?.profilePicture?.[0]; 
+    const coverPhoto = req.files?.coverPhoto?.[0]; 
+    
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
+    
+    if (bio) {
+        console.log("Updating bio:", bio);
+        user.bio = bio;
+    }
+    if(gender) user.gender = gender;
+    if(profilePicture) {
+        const fileUri = getDataUri(profilePicture)
+        const cloud_response = await cloudinary.uploader.upload(fileUri)
+        user.profilePicture = cloud_response.secure_url;
+    }
+    if (coverPhoto) {
+        console.log("Updating cover photo:", coverPhoto);
+        const fileUri = getDataUri(coverPhoto);
+        const cloud_response = await cloudinary.uploader.upload(fileUri);
+        user.coverPhoto = cloud_response.secure_url;
+    }
+    
+    if(oldPassword && newPassword){
+      const isPasswordMatch = await bcrypt.compare(oldPassword,user.password);
+      if(!isPasswordMatch){
+        return res.status(400).json({
+          message:'!Password doesnot match !!',
+          success:false
+        })
+      }
+      else{
+        newPassword = await bcrypt.hash(newPassword, 10)
+        user.password = newPassword
+      }
+    }
 
-        const profilePicture = req.files?.profilePicture?.[0]; // Extract first file
-        const coverPhoto = req.files?.coverPhoto?.[0]; // Extract first file
-
-        if (!user) {
-            return res.status(404).json({ success: false, message: "User not found" });
-        }
-
-        if (bio) {
-            user.bio = bio;
-        }
-        if (gender) {
-            user.gender = gender;
-        }
-        if (profilePicture) {
-            const fileUri = getDataUri(profilePicture)
-            const cloud_response = await cloudinary.uploader.upload(fileUri)
-            user.profilePicture = cloud_response.secure_url;
-        }
-        if (coverPhoto) {
-            const fileUri = getDataUri(coverPhoto)
-            const cloud_response = await cloudinary.uploader.upload(fileUri)
-            user.coverPhoto = cloud_response.secure_url;
-        }
-
-        await user.save();
-        return res.status(200).json({
-            message: "profile updated successfully!",
-            success: true,
-            user
-        });
+    await user.save();
+    const updatedUser = await User.findById(user._id).select("-password")
+    return res.status(200).json({
+    message: "Profile updated successfully!",
+    success: true,
+    user: updatedUser
+     });
+    
     } catch (error) {
-        console.log(error);
+        console.log(error)
     }
 }
 
@@ -271,85 +363,238 @@ export const SuggestedUser = async (req, res) => {
 }
 
 export const friendOrUnfriend = async (req, res) => {
-
-    try {
-        const Me = req.id;
-        const FriendTargetId = req.params.id;
-
-        if (Me === FriendTargetId) {
-            return res.status(400).json({
-                message: 'You cannot friend/unfriend yourself',
-                success: false
-            });
-        }
-
-        const user = await User.findById(Me)
-        const targetUser = await User.findById(FriendTargetId)
-
-        if (!user || !targetUser) {
-            return res.status(400).json({
-                message: 'User not found',
-                success: false
-            });
-        }
-
-        const isFriend = user.friends.includes(FriendTargetId)
-        if (isFriend) {
-            await Promise.all([
-                User.updateOne({ _id: Me }, { $pull: { friends: targetUser } }),
-                User.updateOne({ _id: targetUser }, { $pull: { friends: Me } }),
-            ])
-            return res.status(200).json({
-                message: "Unfriend successfully",
-                success: true
-            })
-        } else {
-            await Promise.all([
-                User.updateOne({ _id: Me }, { $push: { friends: targetUser } }),
-                User.updateOne({ _id: targetUser }, { $push: { friends: Me } }),
-            ])
-            return res.status(200).json({
-                message: "Friend successfully",
-                success: true
-            })
-        }
-    } catch (error) {
-        console.log(error);
-    }
-}
-
-export const changePassword = async (req, res) => {
     try {
         const userId = req.id;
-        const { oldPassword, newPassword } = req.body;
-        const user = await User.findById(userId)
+        const targetUser = req.params.id;
+        let targetUserP = await User.findById(targetUser);
+        let user = await User.findById(userId);
 
-        if (!user) {
+        if (userId === targetUser) {
             return res.status(401).json({
-                message: "User not authenticated",
+                msessage: "you cannot friend or unfriend yourself",
                 success: false
             })
         }
 
-        const isPasswordMatch = await bcrypt.compare(oldPassword, user.password)
-        if (!isPasswordMatch) {
-            return res.status(401).json({
-                message: "Password incorrect",
-                success: false
+        const isFriends = user.friends.includes(targetUser) && targetUserP.friends.includes(userId);
+
+        if (isFriends) {
+            await Promise.all([
+                User.updateOne({ _id: userId }, { $pull: { friends: targetUser } }),
+                User.updateOne({ _id: targetUser }, { $pull: { friends: userId } }),
+
+            ])
+            const populatedPosts = (await Promise.all(
+                user.posts.map(async (postId) => {
+                    const post = await Post.findById(postId);
+                    if (post && post.author.equals(user._id)) {
+                        return post;
+                    }
+                    return null;
+                })
+            )).filter(post => post !== null);
+
+            user = {
+                _id: user._id,
+                username: user.username,
+                email: user.email,
+                profilePicture: user.profilePicture,
+                bio: user.bio,
+                friends: user.friends,
+                posts: populatedPosts,
+            };
+
+
+            await targetUserP.populate([
+                {
+                    path: "posts",
+                    populate: [
+                        {
+                            path: "author",
+                            select: "username profilePicture"
+                        },
+                        {
+                            path: "comments",
+                            options: { sort: { createdAt: -1 } },
+                            populate: {
+                                path: "author",
+                                select: "username profilePicture"
+                            }
+                        },
+                        {
+                            path: "reactions",
+                            options: { sort: { createdAt: -1 } },
+                            populate: {
+                                path: "author",
+                                select: "username profilePicture"
+                            }
+                        },
+                        {
+                            path: "originalPost",
+                            populate: [
+                                { path: "author", select: "username profilePicture" },
+                                {
+                                    path: "comments",
+                                    options: { sort: { createdAt: -1 } },
+                                    populate: { path: "author", select: "username profilePicture" },
+                                },
+                                {
+                                    path: "reactions",
+                                    options: { sort: { createdAt: -1 } },
+                                    populate: { path: "author", select: "username profilePicture" },
+                                },
+                            ],
+                        },
+                    ]
+                },
+                {
+                    path: "saved",
+                    populate: [
+                        {
+                            path: "author",
+                            select: "username profilePicture"
+                        },
+                        {
+                            path: "comments",
+                            options: { sort: { createdAt: -1 } },
+                            populate: {
+                                path: "author",
+                                select: "username profilePicture"
+                            }
+                        },
+                        {
+                            path: "reactions",
+                            options: { sort: { createdAt: -1 } },
+                            populate: {
+                                path: "author",
+                                select: "username profilePicture"
+                            }
+                        },
+                    ]
+                },
+                {
+                    path: "friends",
+                    select: "username profilePicture"
+                }
+            ]);
+
+            return res.status(200).json({
+                message: 'user has removed from friendlist',
+                success: true,
+                user,
+                targetUser: targetUserP
+            })
+
+        } else if (!isFriends) {
+            await Promise.all([
+                User.updateOne({ _id: userId }, { $push: { friends: targetUser } }),
+                User.updateOne({ _id: targetUser }, { $push: { friends: userId } }),
+            ])
+            const populatedPosts = (await Promise.all(
+                user.posts.map(async (postId) => {
+                    const post = await Post.findById(postId);
+                    if (post && post.author.equals(user._id)) {
+                        return post;
+                    }
+                    return null;
+                })
+            )).filter(post => post !== null);
+
+            user = {
+                _id: user._id,
+                username: user.username,
+                email: user.email,
+                profilePicture: user.profilePicture,
+                bio: user.bio,
+                friends: user.friends,
+                posts: populatedPosts,
+            };
+
+
+            await targetUserP.populate([
+                {
+                    path: "posts",
+                    populate: [
+                        {
+                            path: "author",
+                            select: "username profilePicture"
+                        },
+                        {
+                            path: "comments",
+                            options: { sort: { createdAt: -1 } },
+                            populate: {
+                                path: "author",
+                                select: "username profilePicture"
+                            }
+                        },
+                        {
+                            path: "reactions",
+                            options: { sort: { createdAt: -1 } },
+                            populate: {
+                                path: "author",
+                                select: "username profilePicture"
+                            }
+                        },
+                        {
+                            path: "originalPost",
+                            populate: [
+                                { path: "author", select: "username profilePicture" },
+                                {
+                                    path: "comments",
+                                    options: { sort: { createdAt: -1 } },
+                                    populate: { path: "author", select: "username profilePicture" },
+                                },
+                                {
+                                    path: "reactions",
+                                    options: { sort: { createdAt: -1 } },
+                                    populate: { path: "author", select: "username profilePicture" },
+                                },
+                            ],
+                        },
+                    ]
+                },
+                {
+                    path: "saved",
+                    populate: [
+                        {
+                            path: "author",
+                            select: "username profilePicture"
+                        },
+                        {
+                            path: "comments",
+                            options: { sort: { createdAt: -1 } },
+                            populate: {
+                                path: "author",
+                                select: "username profilePicture"
+                            }
+                        },
+                        {
+                            path: "reactions",
+                            options: { sort: { createdAt: -1 } },
+                            populate: {
+                                path: "author",
+                                select: "username profilePicture"
+                            }
+                        },
+                    ]
+                },
+                {
+                    path: "friends",
+                    select: "username profilePicture"
+                }
+            ]);
+            return res.status(200).json({
+                message: 'user has been added to  friendlist',
+                success: true,
+                user,
+                targetUser: targetUserP
             })
         }
 
-        user.password = newPassword;
-        await user.save();
 
-        return res.status(200).json({
-            message: "Password changed succesfully",
-            success: true,
-            user
-        })
 
     } catch (error) {
-        console.log(error);
+        console.log(error)
     }
 }
 
@@ -492,8 +737,8 @@ export const searchUsers = async (req, res) => {
 
         const searchResults = await User.find({
             _id: { $nin: user.blockedUsers },
-            username: { $regex: new RegExp(searchRes,"i")},
-            blockedUsers: {$nin: [userId]}
+            username: { $regex: new RegExp(searchRes, "i") },
+            blockedUsers: { $nin: [userId] }
         }).select("username profilePicture")
 
         return res.status(200).json({

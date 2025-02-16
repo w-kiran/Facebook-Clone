@@ -1,123 +1,207 @@
-import React, { useRef, useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
-import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar'
-import { useDispatch, useSelector } from 'react-redux'
-import { Button } from './ui/button'
-import { Textarea } from './ui/textarea'
-import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from './ui/select'
-import { Loader2 } from 'lucide-react'
-import axios from 'axios'
-import { toast } from 'sonner'
-import { setAuthUser } from '@/redux/authSlice'
-import { BACKEND_URL } from '../../configURL'
+import React, { useEffect, useState } from "react";
+import { Dialog, DialogContent, DialogTitle } from "./ui/dialog";
+import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
+import blankprofilepic from "../assets/blankprofilepic.png";
+import blankcoverpic from "../assets/blankcoverpic.png";
+import { Button } from "./ui/button";
+import { useSelector, useDispatch } from "react-redux";
+import axios from "axios";
+import { toast } from "sonner";
+import { useParams } from "react-router-dom";
+import { BACKEND_URL } from "../../configURL";
 
-const EditProfile = () => {
-    const imageRef = useRef()
-    const {user} = useSelector(store => store.auth)
-    const [loading,setLoading]=useState(false)
-    const [input, setInput] = useState({
-        profilePicture: user?.profilePicture,
-        bio: user?.bio,
-        gender: user?.gender
-    });
-    const navigate = useNavigate();
-    const dispatch = useDispatch();
+const EditProfile = ({ open, setOpen, userProfile }) => {
+  const { user } = useSelector((store) => store.auth);
+  const [bio, setBio] = useState(userProfile?.bio || "");
+  const [gender, setGender] = useState(userProfile?.gender || "");
+  const [oldPassword, setOldPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [profilePicture, setProfilePicture] = useState(null);
+  const [coverPhoto, setCoverPhoto] = useState(null);
 
-    const fileChangeHandler = (e) => {
-        const file = e.target.files?.[0];
-        if (file) setInput({ ...input, profilePhoto: file });
+  const [profilePreview, setProfilePreview] = useState(
+    userProfile?.profilePicture || blankprofilepic
+  );
+  const [coverPreview, setCoverPreview] = useState(
+    userProfile?.coverPhoto || blankcoverpic
+  );
+
+//   useEffect(() => {
+//     if (open) {
+  
+//       setBio("");
+//       setGender("");
+//       setOldPassword("");
+//       setNewPassword("");
+//       setProfilePicture(null);
+//       setCoverPhoto(null);
+//       setProfilePreview(userProfile?.profilePicture || blankprofilepic);
+//       setCoverPreview(userProfile?.coverPhoto || blankcoverpic);
+//     }
+//   }, [open]); 
+  const handleProfilePicChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setProfilePicture(file);
+      setProfilePreview(URL.createObjectURL(file));
     }
+  };
 
-    const selectChangeHandler = (value) => {
-        setInput({ ...input, gender: value });
+  const handleCoverPicChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setCoverPhoto(file);
+      setCoverPreview(URL.createObjectURL(file));
     }
+  };
 
+  const handleProfileUpdate = async (e) => {
+    e.preventDefault();
 
-    const editProfileHandler = async () => {
-        const formData = new FormData();
-        formData.append("bio", input.bio);
-        formData.append("gender", input.gender);
-        if(input.profilePicture){
-            formData.append("profilePhoto", input.profilePicture);
+    const formData = new FormData();
+    if (bio) formData.append("bio", bio);
+    if (gender) formData.append("gender", gender);
+    if (oldPassword) formData.append("oldPassword", oldPassword);
+    if (newPassword) formData.append("newPassword", newPassword);
+    if (profilePicture) formData.append("profilePicture", profilePicture);
+    if (coverPhoto) formData.append("coverPhoto", coverPhoto);
+
+    try {
+      const res = await axios.post(
+        `${BACKEND_URL}/api/v1/user/profile/${user._id}/editprofile`,
+        formData,
+        {
+          headers: { "Content-Type": "multipart/form-data" },
+          withCredentials: true,
         }
-        try {
-            setLoading(true);
-            const res = await axios.post(`${BACKEND_URL}/api/v1/user/profile/edit`, formData,{
-                headers:{
-                    'Content-Type':'multipart/form-data'
-                },
-                withCredentials:true
-            });
-            if(res.data.success){
-                const updatedUserData = {
-                    ...user,
-                    bio:res.data.user?.bio,
-                    profilePicture:res.data.user?.profilePicture,
-                    gender:res.data.user.gender
-                };
-                dispatch(setAuthUser(updatedUserData));
-                navigate(`/profile/${user?._id}`);
-                toast.success(res.data.message);
-            }
+      );
 
-        } catch (error) {
-            console.log(error);
-            toast.error(error.response.data.messasge);
-        } finally{
-            setLoading(false);
-        }
+      if (res.data.success) {
+        toast.success(res.data.message)
+        setProfilePreview(res.data.user.profilePicture);
+    setCoverPreview(res.data.user.coverPhoto);
+    setBio(res.data.user.bio);
+      }
+    } catch (error) {
+      console.error("Error updating profile:", error);
     }
-    return (
-    <div className='flex max-w-2xl mx-auto pl-10'>
-            <section className='flex flex-col gap-6 w-full my-8'>
-                <h1 className='font-bold text-xl'>Edit Profile</h1>
-                <div className='flex items-center justify-between bg-gray-100 rounded-xl p-4'>
-                    <div className='flex items-center gap-3'>
-                        <Avatar>
-                            <AvatarImage src={user?.profilePicture} alt="post_image" />
-                            <AvatarFallback>CN</AvatarFallback>
-                        </Avatar>
-                        <div>
-                            <h1 className='font-bold text-sm'>{user?.username}</h1>
-                            <span className='text-gray-600'>{user?.bio || 'Bio here...'}</span>
-                        </div>
-                    </div>
-                    <input ref={imageRef} onChange={fileChangeHandler} type='file' className='hidden' />
-                    <Button onClick={() => imageRef?.current.click()} className='bg-[#0095F6] h-8 hover:bg-[#318bc7]'>Change photo</Button>
-                </div>
-                <div>
-                    <h1 className='font-bold text-xl mb-2'>Bio</h1>
-                    <Textarea value={input.bio} onChange={(e) => setInput({ ...input, bio: e.target.value })} name='bio' className="focus-visible:ring-transparent" />
-                </div>
-                <div>
-                    <h1 className='font-bold mb-2'>Gender</h1>
-                    <Select defaultValue={input.gender} onValueChange={selectChangeHandler}>
-                        <SelectTrigger className="w-full">
-                            <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectGroup>
-                                <SelectItem value="male">Male</SelectItem>
-                                <SelectItem value="female">Female</SelectItem>
-                            </SelectGroup>
-                        </SelectContent>
-                    </Select>
-                </div>
-                <div className='flex justify-end'>
-                    {
-                        loading ? (
-                            <Button className='w-fit bg-[#0095F6] hover:bg-[#2a8ccd]'>
-                                <Loader2 className='mr-2 h-4 w-4 animate-spin' />
-                                Please wait
-                            </Button>
-                        ) : (
-                            <Button onClick={editProfileHandler} className='w-fit bg-[#0095F6] hover:bg-[#2a8ccd]'>Submit</Button>
-                        )
-                    }
-                </div>
-            </section>
-        </div>
-    )
-}
+  };
 
-export default EditProfile
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogContent onInteractOutside={() => setOpen(false)}>
+        <DialogTitle>Edit Profile</DialogTitle>
+        <form
+          onSubmit={handleProfileUpdate}
+          className="border rounded-lg p-2 bg-slate-50"
+        >
+          {/* Profile Picture */}
+          <div className="font-semibold text-lg">
+            Profile Picture
+            <div className="flex justify-center items-center relative mt-2">
+              <label htmlFor="profilePicInput" className="cursor-pointer">
+                <Avatar className="h-28 w-28 border-2 border-gray-300 hover:border-blue-500">
+                  <AvatarImage src={profilePreview} />
+                  <AvatarFallback />
+                </Avatar>
+              </label>
+              <input
+                type="file"
+                id="profilePicInput"
+                accept="image/*"
+                className="hidden"
+                onChange={handleProfilePicChange}
+              />
+            </div>
+          </div>
+
+          {/* Cover Photo */}
+          <div className="font-semibold text-lg mt-2">
+            Cover Photo
+            <div className="flex justify-center items-center mt-2 relative">
+              <label htmlFor="coverPicInput" className="cursor-pointer">
+                <img
+                  src={coverPreview}
+                  className="border rounded-xl w-full h-40 object-cover"
+                />
+              </label>
+              <input
+                type="file"
+                id="coverPicInput"
+                accept="image/*"
+                className="hidden"
+                onChange={handleCoverPicChange}
+              />
+            </div>
+          </div>
+
+          {/* Bio */}
+          <div className="font-semibold text-lg mt-2">
+            Bio
+            <div className="flex justify-center">
+              <textarea
+                className="outline-none border rounded-md w-full min-h-[20px] max-h-[30px] p-1 text-sm leading-tight resize-none overflow-hidden"
+                placeholder="Describe Yourself"
+                value={bio}
+                onChange={(e) => setBio(e.target.value)}
+              />
+            </div>
+          </div>
+
+          {/* Gender */}
+          <div className="flex items-center space-x-4 font-semibold text-lg mt-2">
+            Gender
+            <label className="flex items-center space-x-2 cursor-pointer ml-2">
+              <input
+                type="radio"
+                name="gender"
+                value="male"
+                checked={gender === "male"}
+                onChange={() => setGender("male")}
+                className="w-5 h-5 cursor-pointer"
+              />
+              <span className="text-lg">Male</span>
+            </label>
+            <label className="flex items-center space-x-2 cursor-pointer">
+              <input
+                type="radio"
+                name="gender"
+                value="female"
+                checked={gender === "female"}
+                onChange={() => setGender("female")}
+                className="w-5 h-5 cursor-pointer"
+              />
+              <span className="text-lg">Female</span>
+            </label>
+          </div>
+
+          {/* Change Password */}
+          <div className="font-semibold text-lg mt-2">
+            Change Password (Optional)
+            <input
+              type="password"
+              placeholder="Old Password"
+              className="border rounded-md p-1 h-[30px] text-sm w-full mt-2"
+              value={oldPassword}
+              onChange={(e) => setOldPassword(e.target.value)}
+            />
+            <input
+              type="password"
+              placeholder="New Password"
+              className="border rounded-md p-1 h-[30px] text-sm w-full mt-2"
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+            />
+          </div>
+
+          {/* Submit Button*/}
+          <Button type="submit" className="w-full mt-4">
+            Save Changes
+          </Button>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
+export default EditProfile;

@@ -16,6 +16,7 @@ import { BACKEND_URL } from '../../configURL'
 import { Card } from './ui/card'
 import ShareDialog from './ShareDialog'
 import { useNavigate } from 'react-router-dom'
+import { setAuthUser } from '@/redux/authSlice'
 
 
 const reactions = [
@@ -30,7 +31,6 @@ const reactions = [
 
 
 const Post = ({ post }) => {
-    const [text, setText] = useState("");
     const [open, setOpen] = useState(false);
     const [openShare, setOpenShare] = useState(false);
     const [threeDot, setThreeDot] = useState(false)
@@ -38,13 +38,8 @@ const Post = ({ post }) => {
     const { posts, selectedPost } = useSelector(store => store.post);
     const [postReactCount, setPostReactCount] = useState(post.reactions && post.reactions.length);
     const [selectedReaction, setSelectedReaction] = useState(null);  // Track selected reaction directly
-    const [comment, setComment] = useState(post.comments);
     const dispatch = useDispatch();
     const navigate  = useNavigate()
-
-    const handleInputChange = (e) => {
-        setText(e.target.value.trim() ? e.target.value : "");
-    };
 
     const toggleReactionHandler = async (reactionType) => {
         try {
@@ -102,7 +97,7 @@ const Post = ({ post }) => {
 
     const bookmarkHandler = async () => {
         try {
-            const res = await axios.get(`${BACKEND_URL}/api/v1/post/${post?._id}/saved`, { withCredentials: true });
+            const res = await axios.get(`${BACKEND_URL}/api/v1/post/${selectedPost?._id}/save`, { withCredentials: true });
             if (res.data.success) {
                 toast.success(res.data.message);
             }
@@ -123,7 +118,7 @@ const Post = ({ post }) => {
                         </Avatar>
                         <div className="flex flex-col">
                             <h1 className="font-semibold flex items-center gap-1">
-                                {post.author?.username}
+                                {post?.author?.username}
                             </h1>
                             <span className="text-gray-500 text-sm">{post.time}</span>
                         </div>
@@ -138,10 +133,10 @@ const Post = ({ post }) => {
                                 <h2 className='mt-2'>Post Options</h2>
                                 <h2 onClick={deletePostHandler}
                                     className='flex items-center mr-1'><RiDeleteBin6Line className='mr-1' />Delete Post</h2>
-                                <h2 className='flex  items-center '> <IoBookmarkOutline className='mr-1' />Saved Post</h2>
+                                <h2 onClick={bookmarkHandler} className='flex  items-center '> <IoBookmarkOutline className='mr-1' />Saved Post</h2>
 
                                 <h2 className='mb-2 flex items-center '
-                                    onClick={() => navigate(`/profile/${post.author._id}`)}>
+                                    onClick={() => navigate(`/profile/${selectedPost.author._id}`)}>
                                     <Avatar className="mr-2 h-4 w-4">
                                         <AvatarImage src={post.author.profilePicture} />
                                         <AvatarFallback>
@@ -237,15 +232,16 @@ const Post = ({ post }) => {
                             <span className="text-gray-500 text-sm">{post.time}</span>
                         </div>
                     </div>
-                    <MoreHorizontal onClick={() => setThreeDot(!threeDot)} className="cursor-pointer text-gray-600" />
+                    <MoreHorizontal onClick={() =>{ setThreeDot(!threeDot), 
+                        dispatch(setSelectedPost(post))}} className="cursor-pointer text-gray-600" />
                     {
                         threeDot && (
                             <div className='absolute flex flex-col right-2 items-center ml-4
                      top-14 bg-white shadow-md  w-2/3  border rounded-md z-20 gap-2 my-2 cursor-pointer'>
                                 <h2 className='mt-2'>Post Options</h2>
-                                <h2 onClick={() => deletePostHandler}
+                                <h2 onClick={deletePostHandler}
                                     className='flex items-center mr-1'><RiDeleteBin6Line className='mr-1' />Delete Post</h2>
-                                <h2 className='flex  items-center '> <IoBookmarkOutline className='mr-1' />Saved Post</h2>
+                                <h2 onClick={bookmarkHandler} className='flex  items-center '> <IoBookmarkOutline className='mr-1' />Saved Post</h2>
 
                                 <h2 className='mb-2 flex items-center '
                                     onClick={() => navigate(`/profile/${post.author._id}`)}>

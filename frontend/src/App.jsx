@@ -3,9 +3,8 @@ import Signup from './components/Signup';
 import Login from './components/Login';
 import MainLayout from './components/Mainlayout';
 import Home from './components/Home';
-import Profile from './components/Profile';
-import EditProfile from './components/EditProfile';
 import ChatPage from './components/ChatPage';
+import UserProfile from './components/UserProfile';
 
 const browserRouter = createBrowserRouter([
   {
@@ -17,18 +16,14 @@ const browserRouter = createBrowserRouter([
         element: <Home/>
       },
       {
-        path: '/profile/:id',
-        element: <Profile/>
-      },
-      {
-        path: '/account/edit',
-        element: <EditProfile/>
-      },
-      {
         path: '/chat',
         element: <ChatPage/>
       }
     ]
+  },
+  {
+        path: '/profile/:id',
+        element: <UserProfile/>
   },
   {
     path: '/login',

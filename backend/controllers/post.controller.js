@@ -4,7 +4,6 @@ import { Comment } from "../models/comment.model.js"
 import sharp from "sharp"
 import cloudinary from "../utils/cloudinary.js";
 import { Reactions } from "../models/reaction.model.js";
-import { populate } from "dotenv";
 
 export const addNewPost = async (req, res) => {
     try {
@@ -19,17 +18,41 @@ export const addNewPost = async (req, res) => {
             })
         }
 
-        const optimizedImageBuffer = await sharp(image.buffer)
-            .resize({ width: 800, height: 800, fit: "inside" })
-            .toFormat("jpeg", { quality: 80 })
-            .toBuffer();
+        if (image) {
+            const optimizedImageBuffer = await sharp(image.buffer)
+                .resize({ width: 800, height: 800, fit: "inside" })
+                .toFormat("jpeg", { quality: 80 })
+                .toBuffer();
 
-        const fileUri = `data:image/jpeg;base64,${optimizedImageBuffer.toString('base64')}`;
-        const cloudResponse = await cloudinary.uploader.upload(fileUri)
+            const fileUri = `data:image/jpeg;base64,${optimizedImageBuffer.toString('base64')}`;
+            const cloudResponse = await cloudinary.uploader.upload(fileUri)
+
+            const post = await Post.create({
+                caption,
+                image: cloudResponse.secure_url,
+                author: userId,
+                visibility: visibility || 'public'
+            })
+
+            const user = await User.findById(userId)
+            if (post) {
+                user.posts.push(post._id)
+                await post.populate({
+                    path: 'author',
+                    select: 'username profilePicture'
+                })
+                await user.save()
+            }
+
+            return res.status(200).json({
+                message: "New Post Added.",
+                success: true,
+                post
+            })
+        }
 
         const post = await Post.create({
             caption,
-            image: cloudResponse.secure_url,
             author: userId,
             visibility: visibility || 'public'
         })
@@ -71,34 +94,33 @@ export const getAllPosts = async (req, res) => {
                     author: userId
                 }
             ]
-        }).sort({ createdAt: -1 })
-            .populate([{
+        }).sort({ createdAt: -1 }).populate([{
+            path: 'author',
+            select: 'username profilePicture'
+        },
+        {
+            path: 'comments',
+            populate: {
                 path: 'author',
                 select: 'username profilePicture'
-            },
-            {
-                path: 'comments',
-                populate: {
-                    path: 'author',
-                    select: 'username profilePicture'
-                }
-            },
-            {
-                path: 'reactions',
-                populate: {
-                    path: 'author',
-                    select: 'username profilePicture'
-                }
-            },
-            {
-                path: 'originalPost',
-                populate: {
-                    path: 'author' ,
-                    select: "username profilePicture"
-                }
             }
+        },
+        {
+            path: 'reactions',
+            populate: {
+                path: 'author',
+                select: 'username profilePicture'
+            }
+        },
+        {
+            path: 'originalPost',
+            populate: {
+                path: 'author',
+                select: "username profilePicture"
+            }
+        }
 
-            ])
+        ])
 
         return res.status(200).json({
             message: 'Watch feed',
@@ -133,7 +155,7 @@ export const postReactions = async (req, res) => {
         const existingReaction = await Reactions.findOne({ author: userId, post: postId });
         if (existingReaction) {
             if (existingReaction.reaction === reaction) {
-                await Reactions.deleteOne({_id:existingReaction._id})
+                await Reactions.deleteOne({ _id: existingReaction._id })
                 post.reactions = post.reactions.filter(id => id.toString() !== existingReaction._id.toString());
                 await post.save();
                 return res.status(200).json({
@@ -291,7 +313,7 @@ export const deletePost = async (req, res) => {
             })
         }
 
-        if (post.author.toString() !== userId) {
+        if (userId !== post.author.toString()) {
             return res.status(403).json({ message: 'Unauthorized' });
         }
 
@@ -386,8 +408,8 @@ export const savePost = async (req, res) => {
                 path: "saved",
                 populate: [
                     { path: "author", select: "username profilePicture" },
-                    { path: "comment", populate: { path: "author", select: "username profilePicture" } },
-                    { path: "reaction", populate: { path: "author", select: "username profilePicture" } }
+                    { path: "comments", populate: { path: "author", select: "username profilePicture" } },
+                    { path: "reactions", populate: { path: "author", select: "username profilePicture" } }
                 ]
             });
 
@@ -396,25 +418,25 @@ export const savePost = async (req, res) => {
                 success: true,
                 savedPost: updatedUser.saved
             });
-        } else {
-            await User.findByIdAndUpdate(userId, { $addToSet: { saved: postId } });
-
-            // Fetch updated user with populated saved posts
-            updatedUser = await User.findById(userId).populate({
-                path: "saved",
-                populate: [
-                    { path: "author", select: "username profilePicture" },
-                    { path: "comment", populate: { path: "author", select: "username profilePicture" } },
-                    { path: "reaction", populate: { path: "author", select: "username profilePicture" } }
-                ]
-            });
-
-            return res.status(200).json({
-                message: 'Post added to saved',
-                success: true,
-                savedPost: updatedUser.saved
-            });
         }
+        await User.findByIdAndUpdate(userId, { $addToSet: { saved: postId } });
+
+        // Fetch updated user with populated saved posts
+        updatedUser = await User.findById(userId).populate({
+            path: "saved",
+            populate: [
+                { path: "author", select: "username profilePicture" },
+                { path: "comments", populate: { path: "author", select: "username profilePicture" } },
+                { path: "reactions", populate: { path: "author", select: "username profilePicture" } }
+            ]
+        });
+
+        return res.status(200).json({
+            message: 'Post added to saved',
+            success: true,
+            savedPost: updatedUser.saved
+        });
+
     } catch (error) {
         console.error(error);
         return res.status(500).json({
@@ -429,7 +451,7 @@ export const sharePost = async (req, res) => {
     try {
         const userId = req.id;
         const postId = req.params.id;
-        const { caption,visibility } = req.body;
+        const { caption, visibility } = req.body;
 
         const post = await Post.findById(postId);
 
@@ -455,28 +477,24 @@ export const sharePost = async (req, res) => {
         await user.updateOne({ $addToSet: { posts: newSharedPost._id } });
         await user.save()
 
-        // Populate sharedPost to return updated data
-        // await user.populate({
-        //     path: "posts",
-        //     populate: [
-        //         {
-        //             path: "author",
-        //             select: "username profilePicture"
-        //         },
-        //         {
-        //             path: "originalPost",
-        //             populate: {
-        //                 path: "author",
-        //                 select: "username profilePicture caption image"
-        //             }
-        //         }
-        //     ]
-        // });
+        const newpost = await Post.findById(newSharedPost._id).populate([{
+            path: "author",
+            select: "username profilePicture",
+
+        },
+        {
+            path: "originalPost",
+            populate: {
+                path: "author",
+                select: "username profilePicture caption image"
+            }
+        }
+        ])
 
         return res.status(200).json({
             message: "Post shared successfully",
             success: true,
-            sharedPost: newSharedPost, 
+            sharedPost: newpost,
         });
 
     } catch (error) {

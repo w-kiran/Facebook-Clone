@@ -39,7 +39,7 @@ const LeftSideBar = () => {
     const sidebarHandler = (text) => {
         switch (text) {
             case `${user?.username}`:
-                navigate(`/profile/${user._id}`);
+                navigate(`/profile/${user?._id}`);
                 break;
             case "Findfriends":
                 navigate('/friends');
@@ -82,7 +82,7 @@ const LeftSideBar = () => {
         }
     };
     return (
-        <div className=" w-[25%] flex flex-col sticky left-0 top-18 z-40 max-h-screen overflow-y-auto ">
+        <div className=" w-[25%] flex flex-col sticky left-0 top-18 z-40 h-screen overflow-y-auto ">
             {
                 sidebarItems.map((item, index) => {
                     return (

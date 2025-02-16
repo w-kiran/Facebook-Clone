@@ -25,7 +25,7 @@ const Profile = () => {
   useGetUserProfile(userId);
   const [activeTab, setActiveTab] = useState("posts");
   const { userProfile, user } = useSelector((store) => store.auth);
-  const { selectedPost } = useSelector((store) => store.post);
+  const { posts = [], selectedPost } = useSelector((store) => store.post);
   const isLoggedInUserProfile = user?._id === userProfile?._id;
   const [displayTab, setDisplayTab] = useState([]);
   const [bio, SetBio] = useState("");
@@ -33,9 +33,8 @@ const Profile = () => {
   const dispatch = useDispatch();
   const [open, setOpen] = useState(false);
   console.log(isLoggedInUserProfile);
-  const [isFriend, setIsFriend] = useState(
-    user?.friends?.includes(userProfile._id)
-  );
+
+  let isFriend = user?.friends?.includes(userId);
 
   useEffect(() => {
     setDisplayTab(userProfile?.posts || []);
@@ -77,11 +76,10 @@ const Profile = () => {
         dispatch(setUserProfile(res.data.targetUser));
 
         // setIsFriend(res.data.user.friends.includes(userId));
-        setIsFriend(!isFriend);
+        isFriend = !isFriend;
         toast.success(res.data.message);
       }
     } catch (error) {
-      setIsFriend((prev) => !prev);
       toast.error(error?.response?.data?.message);
       console.log(error);
     }
@@ -113,14 +111,14 @@ const Profile = () => {
     return <div>Failed to load user profile.</div>;
   }
 
-  const savedHandler = async()=>{
+  const savedHandler = async () => {
     try {
-      const res = await axios.get(`${BACKEND_URL}/api/v1/post/${selectedPost._id}/savepost`,{
-        withCredentials:true
+      const res = await axios.get(`${BACKEND_URL}/api/v1/post/${selectedPost._id}/save`, {
+        withCredentials: true
       })
-      if(res.data.success){
+      if (res.data.success) {
         toast.success(res.data.message);
-          dispatch(setChangeSaved(res.data.savedPost))
+        dispatch(setChangeSaved(res.data.savedPost))
       }
     } catch (error) {
       console.log(error)
@@ -131,9 +129,9 @@ const Profile = () => {
     <div className="flex flex-col items-center w-full h-screen flex-grow relative ">
       {/* Cover Photo */}
       <div className="relative w-full h-[60%] ">
-        {userProfile && userProfile.coverPicture ? (
+        {userProfile && userProfile.coverPhoto ? (
           <img
-            src={userProfile?.coverPicture}
+            src={userProfile?.coverPhoto}
             alt="cover"
             className="w-[70%] h-[100%] object-center ml-[15%] rounded-lg"
           />
@@ -196,9 +194,8 @@ const Profile = () => {
             (tab) => (
               <span
                 key={tab}
-                className={`cursor-pointer ${
-                  activeTab === tab ? "font-bold border-b-2 border-black" : ""
-                }`}
+                className={`cursor-pointer ${activeTab === tab ? "font-bold border-b-2 border-black" : ""
+                  }`}
                 onClick={() => handleTabChange(tab)}
               >
                 {tab.toUpperCase()}
@@ -228,7 +225,7 @@ const Profile = () => {
             <p className="mt-4"> Gender : {userProfile?.gender}</p>
           )}
 
-          {user?.bio && (
+          {userProfile?.bio && (
             <div className="mt-2">
               <span className="font-medium">Bio:</span>{" "}
               <p className="text-gray-700">{userProfile?.bio}</p>
@@ -256,10 +253,17 @@ const Profile = () => {
 
           {activeTab === "posts" && displayTab.length > 0 && (
             <div className="flex flex-col w-full mt-2">
-              {user?._id === userProfile?._id && <CreatePost />}
-              {displayTab.map((post) => (
-                <Post key={post._id} post={post} />
-              ))}
+              <div className="flex items-center justify-center">
+                {user?._id === userProfile?._id && <CreatePost />}
+              </div>
+              <div className="-mb-10">
+                {posts.length > 0 ? (
+                  posts.map((post) => <Post key={post._id} post={post} />)
+                ) : (
+                  <p>No posts available</p>
+                )}
+              </div>
+
             </div>
           )}
 
@@ -316,13 +320,13 @@ const Profile = () => {
                         View Profile
                       </h2>
 
-                   {
-                    user._id === userProfile._id && 
-                    <h2 className="mb-2 flex items-center" onClick={savedHandler}>
-                    <IoBookmarkOutline className="mr-1"/>
-                    Remove from saved
-                       </h2>
-                   }
+                      {
+                        user._id === userProfile._id &&
+                        <h2 className="mb-2 flex items-center" onClick={savedHandler}>
+                          <IoBookmarkOutline className="mr-1" />
+                          Remove from saved
+                        </h2>
+                      }
 
                     </div>
                   )}
