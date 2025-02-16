@@ -41,7 +41,7 @@ export const getMessages = async (req, res) => {
             participants: { $all: [senderId, receiverId] }
         }).populate('messages');
         if (!conversation) return res.status(200).json({ success: true, messages: [] });
-        return res.status(200).json({ success: true, message: conversation?.message });
+        return res.status(200).json({ success: true, messages: conversation?.messages });
 
     } catch (error) {
         console.log(error);
@@ -69,17 +69,22 @@ export const deleteMessage = async (req, res) => {
             });
         }
 
-        await Promise.all([
-            Message.findByIdAndDelete(messageId),
-            Conversation.updateOne(
-                { messages: messageId },
-                { $pull: { messages: messageId }}
-            )
-        ]);
+        const deletedmessage = await Message.findById(messageId)
+        deletedmessage.message="",
+        deletedmessage.isDeleted=true,
+        await deletedmessage.save()
+        // await Promise.all([
+        //     Message.findByIdAndDelete(messageId),
+        //     Conversation.updateOne(
+        //         { messages: messageId },
+        //         { $pull: { messages: messageId }}
+        //     )
+        // ]);
 
         return res.status(200).json({
             message: "Message deleted",
             success: true
+            
         });
     } catch (error) {
         console.log(error);
