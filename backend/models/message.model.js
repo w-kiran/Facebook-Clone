@@ -5,6 +5,6 @@ const messageSchema = new mongoose.Schema({
     receiverId:{type:mongoose.Schema.Types.ObjectId, ref:"User"},
     message:{type:String,default:""},
     isDeleted: { type: Boolean, default: false },
-})
+},{timestamps:true})
 
 export const Message = mongoose.model("Message",messageSchema)

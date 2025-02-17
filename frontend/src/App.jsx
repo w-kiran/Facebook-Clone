@@ -13,17 +13,17 @@ const browserRouter = createBrowserRouter([
     children: [
       {
         path: '/',
-        element: <Home/>
-      },
-      {
-        path: '/chat',
-        element: <ChatPage/>
+        element: <Home />
       }
     ]
   },
   {
-        path: '/profile/:id',
-        element: <UserProfile/>
+    path: '/chat',
+    element: <ChatPage />
+  },
+  {
+    path: '/profile/:id',
+    element: <UserProfile />
   },
   {
     path: '/login',

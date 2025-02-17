@@ -40,7 +40,7 @@ const Messages = ({ selectedUser }) => {
     return (
         <div className='flex-1 flex flex-col overflow-y-auto p-4 bg-gray-50'>
 
-            <div className='flex flex-col gap-3 overflow-y-auto px-4 py-2 h-full'>
+            <div className='flex flex-col gap-3 overflow-y-auto scrollbar-thin px-4 py-2 h-full'>
                 <div className='flex justify-center mb-4'>
                     <div className='flex flex-col items-center'>
                         <Avatar className="h-16 w-16">
@@ -60,23 +60,38 @@ const Messages = ({ selectedUser }) => {
                         (msg.senderId === selectedUser?._id && msg.receiverId === user?._id)
                     )
                     .map((msg) => (
-                        <div key={msg._id} className={`flex ${msg.senderId === user?._id ? 'justify-end' : 'justify-start'}`}>
-                            {!msg.isDeleted ? (
-                                <div
-                                    onClick={() => {
-                                        dispatch(setSelectedMessages(msg));
-                                        setOpenPopout(true);
-                                    }}
-                                    className={`p-3 rounded-xl max-w-xs break-words shadow-md ${msg.senderId === user?._id ? 'bg-blue-500 text-white' : 'bg-gray-200 text-black'}`}
-                                >
-                                    <div>{msg.message}</div>
-                                </div>
-                            ) : (
-                                <div className='p-3 rounded-xl max-w-xs break-words shadow-md bg-red-300 text-red-500 border-red-600 font-semibold'>
-                                    Message deleted
-                                </div>
-                            )}
-                        </div>
+                        <div className='flex flex-col'>
+                            <div className="flex justify-center text-gray-500 text-xs my-2">
+                               { new Date(msg.createdAt).toLocaleString()}
+                            </div>
+                            <div key={msg._id} className={`flex ${msg.senderId === user?._id ? 'justify-end' : 'justify-start'}`}>
+                                {!msg.isDeleted ? (
+                                    <div className='flex items-center'>
+                                        {msg.senderId != user?._id &&
+                                            <Avatar className="h-9 w-9 mr-2">
+                                                <AvatarImage src={selectedUser?.profilePicture} alt='profile' />
+                                                <AvatarFallback>CN</AvatarFallback>
+                                            </Avatar>
+                                        }
+                                        <div
+                                            onClick={() => {
+                                                dispatch(setSelectedMessages(msg));
+                                                setOpenPopout(true);
+                                            }}
+                                            className={`py-2 px-3 rounded-full max-w-xs break-words items-center shadow-md ${msg.senderId === user?._id ? 'bg-blue-500 text-white' : 'bg-gray-200 text-black'}`}
+                                        >
+
+                                            {msg.senderId != user?._id ?
+                                                <div>{msg.message}</div>:<div>{msg.message}</div>
+                                            }
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <div className='py-2 px-3 rounded-3xl max-w-xs break-words shadow-md border border-red-500 bg-white text-red-500 font-semibold'>
+                                        Message deleted
+                                    </div>
+                                )}
+                            </div></div>
                     ))}
 
             </div>
