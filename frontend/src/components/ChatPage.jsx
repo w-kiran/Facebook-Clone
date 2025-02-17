@@ -13,7 +13,7 @@ import { FaThumbsUp, FaRegThumbsUp } from 'react-icons/fa'; // Import icons
 
 const ChatPage = () => {
     const [textMessage, setTextMessage] = useState("");
-    const { user, suggestedUsers, selectedUser } = useSelector(store => store.auth);
+    const { user, selectedUser, allUsers } = useSelector(store => store.auth);
     const { onlineUsers, messages } = useSelector(store => store.chat);
     const dispatch = useDispatch();
 
@@ -63,16 +63,16 @@ const ChatPage = () => {
                 <h1 className='font-bold text-xl mb-4'>{user?.username}</h1>
                 <hr className='mb-4 border-gray-300' />
                 <div>
-                    {suggestedUsers.map((suggestedUser) => {
-                        const isOnline = onlineUsers.includes(suggestedUser?._id);
+                    {allUsers.map((allUser) => {
+                        const isOnline = onlineUsers.includes(allUser?._id);
                         return (
-                            <div key={suggestedUser?._id} onClick={() => dispatch(setSelectedUser(suggestedUser))} className='flex gap-3 items-center p-3 hover:bg-gray-200 cursor-pointer rounded-lg'>
+                            <div key={allUser?._id} onClick={() => dispatch(setSelectedUser(allUser))} className='flex gap-3 items-center p-3 hover:bg-gray-200 cursor-pointer rounded-lg'>
                                 <Avatar className='w-12 h-12'>
-                                    <AvatarImage src={suggestedUser?.profilePicture} />
+                                    <AvatarImage src={allUser?.profilePicture} />
                                     <AvatarFallback>CN</AvatarFallback>
                                 </Avatar>
                                 <div className='flex flex-col'>
-                                    <span className='font-medium'>{suggestedUser?.username}</span>
+                                    <span className='font-medium'>{allUser?.username}</span>
                                     <span className={`text-xs font-bold ${isOnline ? 'text-green-500' : 'text-gray-400'}`}>{isOnline ? 'Online' : 'Offline'}</span>
                                 </div>
                             </div>

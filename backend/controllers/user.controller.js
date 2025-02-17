@@ -278,6 +278,18 @@ export const getProfile = async (req, res) => {
 //         console.log(error);
 //     }
 // }
+export const getAllUsers = async(req,res)=>{
+    try {
+        const allUsers = await User.find().select("username profilePicture");
+        return res.status(200).json({
+            message:'All User found',
+            success:true,
+            allUsers
+          })
+    } catch (error) {
+        console.log();
+    }
+}
 
 export const editProfile = async(req,res)=>{
     try {

@@ -32,47 +32,53 @@ const Messages = ({ selectedUser }) => {
             toast.error(error.response.data.message)
         }
     }
-    // Close popout after delete
 
-
-    // Close popout without doing anything
     const closePopout = () => {
         setOpenPopout(false);
     };
 
     return (
         <div className='flex-1 flex flex-col overflow-y-auto p-4 bg-gray-50'>
-            <div className='flex justify-center mb-4'>
-                <div className='flex flex-col items-center'>
-                    <Avatar className="h-16 w-16">
-                        <AvatarImage src={selectedUser?.profilePicture} alt='profile' />
-                        <AvatarFallback>CN</AvatarFallback>
-                    </Avatar>
-                    <span className='font-semibold mt-2'>{selectedUser?.username}</span>
-                    <Link to={`/profile/${selectedUser?._id}`}>
-                        <Button className="h-8 mt-2" variant="secondary">View Profile</Button>
-                    </Link>
-                </div>
-            </div>
 
             <div className='flex flex-col gap-3 overflow-y-auto px-4 py-2 h-full'>
-                {messages && messages.map((msg) => (
-                    <div key={msg._id} className={`flex ${msg.senderId === user?._id ? 'justify-end' : 'justify-start'}`}>
-                        <div
-                            onClick={() => {
-                                dispatch(setSelectedMessages(msg));
-                                setOpenPopout(true); // Open popout when message is clicked
-                            }}
-                            className={`p-3 rounded-lg max-w-xs break-words shadow-md ${msg.senderId === user?._id ? 'bg-blue-500 text-white' : 'bg-gray-200 text-black'} ${!msg.message ? 'bg-red-200 border border-red-500' : ''}`}
-                        >
+                <div className='flex justify-center mb-4'>
+                    <div className='flex flex-col items-center'>
+                        <Avatar className="h-16 w-16">
+                            <AvatarImage src={selectedUser?.profilePicture} alt='profile' />
+                            <AvatarFallback>CN</AvatarFallback>
+                        </Avatar>
+                        <span className='font-semibold mt-2'>{selectedUser?.username}</span>
+                        <Link to={`/profile/${selectedUser?._id}`}>
+                            <Button className="h-8 mt-2" variant="secondary">View Profile</Button>
+                        </Link>
+                    </div>
+                </div>
+
+                {messages
+                    .filter(msg =>
+                        (msg.senderId === user?._id && msg.receiverId === selectedUser?._id) ||
+                        (msg.senderId === selectedUser?._id && msg.receiverId === user?._id)
+                    )
+                    .map((msg) => (
+                        <div key={msg._id} className={`flex ${msg.senderId === user?._id ? 'justify-end' : 'justify-start'}`}>
                             {!msg.isDeleted ? (
-                                <div>{msg.message}</div>
+                                <div
+                                    onClick={() => {
+                                        dispatch(setSelectedMessages(msg));
+                                        setOpenPopout(true);
+                                    }}
+                                    className={`p-3 rounded-xl max-w-xs break-words shadow-md ${msg.senderId === user?._id ? 'bg-blue-500 text-white' : 'bg-gray-200 text-black'}`}
+                                >
+                                    <div>{msg.message}</div>
+                                </div>
                             ) : (
-                                <div className='bg-red-500 text-white font-semibold'>Message deleted</div>
+                                <div className='p-3 rounded-xl max-w-xs break-words shadow-md bg-red-300 text-red-500 border-red-600 font-semibold'>
+                                    Message deleted
+                                </div>
                             )}
                         </div>
-                    </div>
-                ))}
+                    ))}
+
             </div>
 
 

@@ -12,5 +12,5 @@ const postSchema = new mongoose.Schema({
         default: 'public'
     },
     originalPost:{type:mongoose.Schema.Types.ObjectId ,ref:"Post"}
-})
+},{timestamps:true})
 export const Post = mongoose.model("Post",postSchema);

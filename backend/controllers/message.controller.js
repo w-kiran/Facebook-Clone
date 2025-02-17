@@ -70,7 +70,7 @@ export const deleteMessage = async (req, res) => {
         }
 
         const deletedmessage = await Message.findById(messageId)
-        deletedmessage.message="",
+        // deletedmessage.message="",
         deletedmessage.isDeleted=true,
         await deletedmessage.save()
         // await Promise.all([
