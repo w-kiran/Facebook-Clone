@@ -761,3 +761,27 @@ export const searchUsers = async (req, res) => {
         console.log(error);
     }
 }
+
+export const getFriends = async(req,res)=>{
+    try {
+     const userId = req.id;
+     let user = await User.findById(userId).populate({
+       path:'friends',
+       select:'username profilePicture'
+     }) 
+   
+       if(!user){
+         return res.status(400).json({
+           message:'user doesnot exist',
+           success:false
+         })
+       }
+       return res.status(200).json({
+         message:'Friends found ',
+         friends:user.friends,
+         success:true
+       })
+    } catch (error) {
+     console.log(error)
+    }
+   }

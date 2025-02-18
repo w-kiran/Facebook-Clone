@@ -45,7 +45,7 @@ const LeftSideBar = () => {
                 navigate(`/profile/${user?._id}`);
                 break;
             case "Findfriends":
-                navigate('/friends');
+                navigate('/suggestedusers');
                 break;
             case "Saved":
                 navigate('/saved');

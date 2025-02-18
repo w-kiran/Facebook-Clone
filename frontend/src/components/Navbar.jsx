@@ -49,6 +49,20 @@ const Navbar = () => {
         }
     };
 
+    const navbarHandler = (name) => {
+        if (name === "home") {
+          navigate("/");
+        } else if (name === "friends") {
+          navigate("/friends");
+        } else if (name === "video") {
+          navigate("/video");
+        } else if (name === "marketplace") {
+          navigate("/marketplace");
+        } else if (name === "game") {
+          navigate("/game");
+        }
+      };
+
     return (
         <nav className="bg-white shadow-md p-3 flex items-center justify-between sticky top-0 z-50">
             {/* Left Section: Logo and Search */}
@@ -94,16 +108,16 @@ const Navbar = () => {
 
             {/* Middle Section: Navigation Icons */}
             <div className="flex space-x-20 justify-center pr-40">
-                <button className="p-2 rounded-full hover:bg-gray-200" title="Home">
+                <button onClick={()=>navbarHandler("home")} className="p-2 rounded-full hover:bg-gray-200" title="Home">
                     <Home size={22} />
                 </button>
-                <button className="p-2 rounded-full hover:bg-gray-200" title="Videos">
+                <button onClick={()=>navbarHandler("video")} className="p-2 rounded-full hover:bg-gray-200" title="Videos">
                     <Video size={22} />
                 </button>
-                <button className="p-2 rounded-full hover:bg-gray-200" title="Marketplace">
+                <button onClick={()=>navbarHandler("marketplace")}  className="p-2 rounded-full hover:bg-gray-200" title="Marketplace">
                     <ShoppingBag size={22} />
                 </button>
-                <button className="p-2 rounded-full hover:bg-gray-200" title="Groups">
+                <button onClick={()=>navbarHandler("friends")}  className="p-2 rounded-full hover:bg-gray-200" title="Groups">
                     <Users size={22} />
                 </button>
             </div>

@@ -6,10 +6,9 @@ import connectDatabase from "./utils/db.js"
 import userRoute from "./routes/user.route.js"
 import postRoute from "./routes/post.route.js"
 import messageRoute from "./routes/message.route.js"
+import { server,app,io } from "./socket/socket.js"
 
 dotenv.config({})
-const app = express()
-
 
 app.get("/",(req,res)=>{
     return res.status(200).json({
@@ -32,7 +31,7 @@ app.use("/api/v1/post",postRoute)
 app.use("/api/v1/message",messageRoute)
 
 const PORT = process.env.PORT
-app.listen(PORT,()=>{
+server.listen(PORT,()=>{
     connectDatabase();
     console.log(`Listening at ${PORT}`);
 })

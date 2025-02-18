@@ -1,37 +1,20 @@
-import axios from "axios";
-import React, { useEffect, useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { useNavigate } from "react-router-dom";
-import { BACKEND_URL } from "../../configURL";
+import { useSelector } from "react-redux";
+import useGetMyFriends from "@/hooks/usegetMyFriends";
 
 
 const Friends = () => {
-  const [friends, setFriends] = useState([]);
   const navigate = useNavigate();
-  useEffect(() => {
-    const fetchSuggestedUsers = async () => {
-      try {
-        const res = await axios.get(`${BACKEND_URL}/api/v1/user/suggested`, {
-          withCredentials: true,
-        });
-        if (res.data.success) {
-          setFriends(res.data.users);
-        }
-      } catch (error) {
-        console.error("Error fetching suggested users:", error);
-      }
-    };
-  
-    fetchSuggestedUsers();
-  }, []); 
-  
+  useGetMyFriends()
+  const { userFriend }= useSelector(store => store.auth)
 
   return (
     <div className="w-full flex flex-col mx-auto">
-    {friends.length === 0 ? (
-      <p className="text-gray-500">No suggested friends available.</p>
+    {userFriend?.length === 0 ? (
+      <p className="text-gray-500">You donot have any freind </p>
     ) : (
-      friends.map((user) => (
+    userFriend &&  userFriend.map((user) => (
         <div
           className="hover:bg-gray-100 cursor-pointer flex items-center justify-between gap-4 p-4"
           key={user._id}

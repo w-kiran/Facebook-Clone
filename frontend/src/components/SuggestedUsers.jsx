@@ -1,40 +1,55 @@
-import React from 'react'
-import { useSelector } from 'react-redux'
-import { Link } from 'react-router-dom';
-import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
+import axios from "axios";
+import React, { useEffect, useState } from "react";
+import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
+import { useNavigate } from "react-router-dom";
+import { BACKEND_URL } from "../../configURL";
+
 
 const SuggestedUsers = () => {
-    const { suggestedUsers } = useSelector(store => store.auth);
-    return (
-        <div className='my-10'>
-            <div className='flex items-center justify-between text-sm'>
-                <h1 className='font-semibold text-gray-600'>Suggested for you</h1>
-                <span className='font-medium cursor-pointer'>See All</span>
-            </div>
-            {
-                suggestedUsers.map((user) => {
-                    return (
-                        <div key={user._id} className='flex items-center justify-between my-5'>
-                            <div className='flex items-center gap-2'>
-                                <Link to={`/profile/${user?._id}`}>
-                                    <Avatar>
-                                        <AvatarImage src={user?.profilePicture} alt="post_image" />
-                                        <AvatarFallback>CN</AvatarFallback>
-                                    </Avatar>
-                                </Link>
-                                <div>
-                                    <h1 className='font-semibold text-sm'><Link to={`/profile/${user?._id}`}>{user?.username}</Link></h1>
-                                    <span className='text-gray-600 text-sm'>{user?.bio || 'Bio here...'}</span>
-                                </div>
-                            </div>
-                            <span className='text-[#3BADF8] text-xs font-bold cursor-pointer hover:text-[#3495d6]'>Follow</span>
-                        </div>
-                    )
-                })
-            }
+  const [friends, setFriends] = useState([]);
+  const navigate = useNavigate();
+  useEffect(() => {
+    const fetchSuggestedUsers = async () => {
+      try {
+        const res = await axios.get(`${BACKEND_URL}/api/v1/user/suggested`, {
+          withCredentials: true,
+        });
+        if (res.data.success) {
+          setFriends(res.data.users);
+        }
+      } catch (error) {
+        console.error("Error fetching suggested users:", error);
+      }
+    };
+  
+    fetchSuggestedUsers();
+  }, []); 
+  
 
+  return (
+    <div className="w-full flex flex-col mx-auto">
+    {friends.length === 0 ? (
+      <p className="text-gray-500">No suggested friends available.</p>
+    ) : (
+      friends.map((user) => (
+        <div
+          className="hover:bg-gray-100 cursor-pointer flex items-center justify-between gap-4 p-4"
+          key={user._id}
+          onClick={() => navigate(`/profile/${user._id}`)}
+        >
+          <div className="ml-6">
+          <Avatar  className="w-16 h-16 " >
+            <AvatarImage className="w-full h-full object-cover" src={user.profilePicture} alt={user.username} />
+            <AvatarFallback>{user.username.charAt(0)}</AvatarFallback>
+          </Avatar>
+          </div>
+          <span className="font-medium mr-6">{user?.bio}</span>
+          <span className="font-medium mr-6">{user.username}</span>
         </div>
-    )
-}
+      ))
+    )}
+  </div>
+);
+};
 
-export default SuggestedUsers
+export default SuggestedUsers;

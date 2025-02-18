@@ -1,5 +1,5 @@
 import express from "express";
-import { register,login, logout, getProfile, editProfile, SuggestedUser, friendOrUnfriend, searchUsers, deleteAccount, blockUsers, mutualFriends, getAllUsers } from "../controllers/user.controller.js";
+import { register,login, logout, getProfile, editProfile, SuggestedUser, friendOrUnfriend, searchUsers, deleteAccount, blockUsers, mutualFriends, getAllUsers, getFriends } from "../controllers/user.controller.js";
 import isAuth from "../middlewares/isAuth.js";
 import upload from "../middlewares/multer.js"
 
@@ -13,6 +13,7 @@ router.route('/profile/:id/editprofile').post(isAuth,upload.fields([{ name: "pro
 router.route('/suggested').get(isAuth,SuggestedUser)
 router.route('/getallusers').get(isAuth,getAllUsers)
 router.route('/friendorunfriend/:id').get(isAuth,friendOrUnfriend)
+router.route('/friends').get(isAuth,getFriends)
 router.route('/deleteaccount').delete(isAuth,deleteAccount)
 router.route('/blockuser').post(isAuth,blockUsers)
 router.route('/mutualfriend').get(isAuth,mutualFriends)
