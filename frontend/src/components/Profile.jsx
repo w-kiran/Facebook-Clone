@@ -19,12 +19,11 @@ import { setPosts, setSelectedPost } from "@/redux/postSlice";
 import { setAuthUser, setUserProfile } from "@/redux/authSlice";
 
 const Profile = () => {
-  const navigate = useNavigate();
   const params = useParams();
   const userId = params.id;
-  useGetUserProfile(userId);
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("posts");
-  const { userProfile, user } = useSelector((store) => store.auth);
+  const { userProfile, user, mutualFriends } = useSelector((store) => store.auth);
   const { posts = [], selectedPost } = useSelector((store) => store.post);
   const isLoggedInUserProfile = user?._id === userProfile?._id;
   const [displayTab, setDisplayTab] = useState([]);
@@ -32,7 +31,6 @@ const Profile = () => {
   const [threeDot, setThreeDot] = useState(false);
   const dispatch = useDispatch();
   const [open, setOpen] = useState(false);
-  console.log(isLoggedInUserProfile);
 
   let isFriend = user?.friends?.includes(userId);
 
@@ -164,7 +162,7 @@ const Profile = () => {
             <h2 className="text-2xl font-bold mt-14 ml-12">
               {userProfile?.username}
             </h2>
-            <p className="text-gray-500 mt-4 ml-12">
+            <p onClick={() => handleTabChange("friends")} className="text-gray-500 mt-4 ml-12 mr-[135px] cursor-pointer border border-black">
               {userProfile?.friends?.length || 0} friends
             </p>
           </div>
@@ -359,33 +357,67 @@ const Profile = () => {
           )}
 
           {activeTab === "friends" && (
-            <div className="flex flex-col my-2 ">
-              {displayTab.map((friend) => (
-                <div
-                  className="hover:bg-gray-100 cursor-pointer  flex items-center justify-between gap-4 p-4"
-                  key={friend._id}
-                  onClick={() => navigate(`/profile/${friend._id}`)}
-                >
-                  <div className="ml-10">
-                    <Avatar className="w-16 h-16 ">
-                      <AvatarImage
-                        className="w-full h-full object-cover"
-                        src={friend?.profilePicture}
-                        alt={friend?.username}
-                      />
-                      <AvatarFallback>
-                        {friend.username.charAt(0)}
-                      </AvatarFallback>
-                    </Avatar>
+            <div className="flex flex-col">
+              <h1>Friends</h1>
+              <div className="flex flex-col my-2 ">
+                {displayTab.map((friend) => (
+                  <div
+                    className="hover:bg-gray-100 cursor-pointer  flex items-center justify-between gap-4 p-4"
+                    key={friend._id}
+                    onClick={() => navigate(`/profile/${friend._id}`)}
+                  >
+                    <div className="ml-10">
+                      <Avatar className="w-16 h-16 ">
+                        <AvatarImage
+                          className="w-full h-full object-cover"
+                          src={friend?.profilePicture}
+                          alt={friend?.username}
+                        />
+                        <AvatarFallback>
+                          {friend?.username.charAt(0)}
+                        </AvatarFallback>
+                      </Avatar>
+                    </div>
+                    <span className="font-medium mr-6">
+                      {friend?.bio?.length > 50
+                        ? friend.bio.slice(0, 50) + "..."
+                        : friend?.bio}
+                    </span>
+                    <span className="font-medium mr-16">{friend?.username}</span>
                   </div>
-                  <span className="font-medium mr-6">
-                    {friend?.bio?.length > 50
-                      ? friend.bio.slice(0, 50) + "..."
-                      : friend?.bio}
-                  </span>
-                  <span className="font-medium mr-16">{friend?.username}</span>
-                </div>
-              ))}
+                ))}
+              </div>
+              {user?._id !== userProfile._id &&
+                <div className="flex flex-col my-2 ">
+                  <h1>Mutual Friends</h1>
+                  {mutualFriends.map((mutualfriend) => (
+                    <div
+                      className="hover:bg-gray-100 cursor-pointer  flex items-center justify-between gap-4 p-4"
+                      key={mutualfriend._id}
+                      onClick={() => navigate(`/profile/${mutualfriend._id}`)}
+                    >
+                      <div className="ml-10">
+                        <Avatar className="w-16 h-16 ">
+                          <AvatarImage
+                            className="w-full h-full object-cover"
+                            src={mutualfriend?.profilePicture}
+                            alt={mutualfriend?.username}
+                          />
+                          <AvatarFallback>
+                            {mutualfriend?.username.charAt(0)}
+                          </AvatarFallback>
+                        </Avatar>
+                      </div>
+                      <span className="font-medium mr-6">
+                        {mutualfriend?.bio?.length > 50
+                          ? mutualfriend.bio.slice(0, 50) + "..."
+                          : mutualfriend?.bio}
+                      </span>
+                      <span className="font-medium mr-16">{mutualfriend?.username}</span>
+                    </div>
+                  ))}
+                </div>}
+
             </div>
           )}
         </div>

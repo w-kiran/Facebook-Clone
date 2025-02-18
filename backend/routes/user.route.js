@@ -16,7 +16,7 @@ router.route('/friendorunfriend/:id').get(isAuth,friendOrUnfriend)
 router.route('/friends').get(isAuth,getFriends)
 router.route('/deleteaccount').delete(isAuth,deleteAccount)
 router.route('/blockuser').post(isAuth,blockUsers)
-router.route('/mutualfriend').get(isAuth,mutualFriends)
+router.route('/mutualfriend/:id').get(isAuth,mutualFriends)
 router.route('/search').post(isAuth,searchUsers)
 
 export default router

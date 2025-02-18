@@ -160,22 +160,22 @@ export const getProfile = async (req, res) => {
                             path: "author",
                             select: "username profilePicture"
                         }
-                    },{
-                        path: "originalPost", 
+                    }, {
+                        path: "originalPost",
                         populate: [
-                          { path: "author", select: "username profilePicture" },
-                          {
-                            path: "comments",
-                            options: { sort: { createdAt: -1 } },
-                            populate: { path: "author", select: "username profilePicture" },
-                          },
-                          {
-                            path: "reactions",
-                            options: { sort: { createdAt: -1 } },
-                            populate: { path: "author", select: "username profilePicture" },
-                          },
+                            { path: "author", select: "username profilePicture" },
+                            {
+                                path: "comments",
+                                options: { sort: { createdAt: -1 } },
+                                populate: { path: "author", select: "username profilePicture" },
+                            },
+                            {
+                                path: "reactions",
+                                options: { sort: { createdAt: -1 } },
+                                populate: { path: "author", select: "username profilePicture" },
+                            },
                         ],
-                      },
+                    },
                 ]
             },
             {
@@ -278,71 +278,71 @@ export const getProfile = async (req, res) => {
 //         console.log(error);
 //     }
 // }
-export const getAllUsers = async(req,res)=>{
+export const getAllUsers = async (req, res) => {
     try {
         const allUsers = await User.find().select("username profilePicture");
         return res.status(200).json({
-            message:'All User found',
-            success:true,
+            message: 'All User found',
+            success: true,
             allUsers
-          })
+        })
     } catch (error) {
         console.log();
     }
 }
 
-export const editProfile = async(req,res)=>{
+export const editProfile = async (req, res) => {
     try {
-    const userId = req.id;
-    const user = await User.findById(userId);
-    const { bio , gender , oldPassword } = req.body;
-    let { newPassword } = req.body;
-    const profilePicture = req.files?.profilePicture?.[0]; 
-    const coverPhoto = req.files?.coverPhoto?.[0]; 
-    
-    if (!user) {
-      return res.status(404).json({ success: false, message: "User not found" });
-    }
-    
-    if (bio) {
-        console.log("Updating bio:", bio);
-        user.bio = bio;
-    }
-    if(gender) user.gender = gender;
-    if(profilePicture) {
-        const fileUri = getDataUri(profilePicture)
-        const cloud_response = await cloudinary.uploader.upload(fileUri)
-        user.profilePicture = cloud_response.secure_url;
-    }
-    if (coverPhoto) {
-        console.log("Updating cover photo:", coverPhoto);
-        const fileUri = getDataUri(coverPhoto);
-        const cloud_response = await cloudinary.uploader.upload(fileUri);
-        user.coverPhoto = cloud_response.secure_url;
-    }
-    
-    if(oldPassword && newPassword){
-      const isPasswordMatch = await bcrypt.compare(oldPassword,user.password);
-      if(!isPasswordMatch){
-        return res.status(400).json({
-          message:'!Password doesnot match !!',
-          success:false
-        })
-      }
-      else{
-        newPassword = await bcrypt.hash(newPassword, 10)
-        user.password = newPassword
-      }
-    }
+        const userId = req.id;
+        const user = await User.findById(userId);
+        const { bio, gender, oldPassword } = req.body;
+        let { newPassword } = req.body;
+        const profilePicture = req.files?.profilePicture?.[0];
+        const coverPhoto = req.files?.coverPhoto?.[0];
 
-    await user.save();
-    const updatedUser = await User.findById(user._id).select("-password")
-    return res.status(200).json({
-    message: "Profile updated successfully!",
-    success: true,
-    user: updatedUser
-     });
-    
+        if (!user) {
+            return res.status(404).json({ success: false, message: "User not found" });
+        }
+
+        if (bio) {
+            console.log("Updating bio:", bio);
+            user.bio = bio;
+        }
+        if (gender) user.gender = gender;
+        if (profilePicture) {
+            const fileUri = getDataUri(profilePicture)
+            const cloud_response = await cloudinary.uploader.upload(fileUri)
+            user.profilePicture = cloud_response.secure_url;
+        }
+        if (coverPhoto) {
+            console.log("Updating cover photo:", coverPhoto);
+            const fileUri = getDataUri(coverPhoto);
+            const cloud_response = await cloudinary.uploader.upload(fileUri);
+            user.coverPhoto = cloud_response.secure_url;
+        }
+
+        if (oldPassword && newPassword) {
+            const isPasswordMatch = await bcrypt.compare(oldPassword, user.password);
+            if (!isPasswordMatch) {
+                return res.status(400).json({
+                    message: '!Password doesnot match !!',
+                    success: false
+                })
+            }
+            else {
+                newPassword = await bcrypt.hash(newPassword, 10)
+                user.password = newPassword
+            }
+        }
+
+        await user.save();
+        const updatedUser = await User.findById(user._id).select("-password")
+        return res.status(200).json({
+            message: "Profile updated successfully!",
+            success: true,
+            user: updatedUser
+        });
+
     } catch (error) {
         console.log(error)
     }
@@ -706,6 +706,8 @@ export const blockUsers = async (req, res) => {
 
 export const mutualFriends = async (req, res) => {
     try {
+
+
         const myId = req.id;
         const targetUserId = req.params.id;
         const me = await User.findById(myId);
@@ -720,10 +722,14 @@ export const mutualFriends = async (req, res) => {
             })
         }
         const mutualFriends = myFriend.filter(friend => targetFriend.includes(friend))
-        const populatedMutualFriends = await User.find({ _id: { $in: mutualFriends } }).select("username profilePicture")
-
+        console.log(mutualFriends);
+        
+        const populatedMutualFriends = await User.find({ _id: { $in: [...mutualFriends] } }).select("username profilePicture")
+        console.log(populatedMutualFriends);
+        
 
         return res.status(200).json({
+            message:"Mutual friends fetched succesfully",
             success: true,
             mutual: populatedMutualFriends
         })
@@ -762,26 +768,26 @@ export const searchUsers = async (req, res) => {
     }
 }
 
-export const getFriends = async(req,res)=>{
+export const getFriends = async (req, res) => {
     try {
-     const userId = req.id;
-     let user = await User.findById(userId).populate({
-       path:'friends',
-       select:'username profilePicture'
-     }) 
-   
-       if(!user){
-         return res.status(400).json({
-           message:'user doesnot exist',
-           success:false
-         })
-       }
-       return res.status(200).json({
-         message:'Friends found ',
-         friends:user.friends,
-         success:true
-       })
+        const userId = req.id;
+        let user = await User.findById(userId).populate({
+            path: 'friends',
+            select: 'username profilePicture'
+        })
+
+        if (!user) {
+            return res.status(400).json({
+                message: 'user doesnot exist',
+                success: false
+            })
+        }
+        return res.status(200).json({
+            message: 'Friends found ',
+            friends: user.friends,
+            success: true
+        })
     } catch (error) {
-     console.log(error)
+        console.log(error)
     }
-   }
+}

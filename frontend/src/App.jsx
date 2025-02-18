@@ -8,7 +8,7 @@ import UserProfile from './components/UserProfile';
 import { useDispatch, useSelector } from 'react-redux';
 import { useEffect } from 'react';
 import { setSocket } from './redux/socketSlice';
-import { setOnlineUsers } from './redux/chatSlice';
+import { setMessages, setOnlineUsers } from './redux/chatSlice';
 import { setNotification } from './redux/rtnSlice';
 import { io } from 'socket.io-client';
 import { BACKEND_URL } from '../configURL';
@@ -73,7 +73,7 @@ function App() {
       socketio.on('notification', (reaction) => {
         dispatch(setNotification(reaction));
       });
-
+      
       return () => {
         socketio.close();
         dispatch(setSocket(null));

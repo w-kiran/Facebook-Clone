@@ -1,6 +1,7 @@
 import { Conversation } from "../models/conversation.model.js";
 import { Message } from "../models/message.model.js"
 import { User } from "../models/user.model.js"
+import { getReceiverSocketId, io } from "../socket/socket.js";
 
 export const sendMessage = async (req, res) => {
     try {
@@ -25,6 +26,11 @@ export const sendMessage = async (req, res) => {
             })
             if (newMessage) conversation.messages.push(newMessage._id);
             await Promise.all([conversation.save(), newMessage.save()])
+
+            const receiverSocketId = getReceiverSocketId(receiverId);
+            if (receiverSocketId) {
+                io.to(receiverSocketId).emit('newMessage', newMessage);
+            }
 
             return res.status(201).json({
                 success: true,
@@ -77,8 +83,10 @@ export const getMessages = async (req, res) => {
 export const deleteMessage = async (req, res) => {
     try {
         const userId = req.id;
-        const messageId = req.params.id;
 
+        const messageId = req.params.id;
+        const receiver = await Message.findById(messageId)
+        const receiverId = receiver.receiverId;
         const message = await Message.findById(messageId);
 
         if (!message) {
@@ -106,6 +114,11 @@ export const deleteMessage = async (req, res) => {
         //         { $pull: { messages: messageId }}
         //     )
         // ]);
+
+        const receiverSocketId = getReceiverSocketId(receiverId);
+        if (receiverSocketId) {
+            io.to(receiverSocketId).emit('deletemessage', deletedmessage);
+        }
 
         return res.status(200).json({
             message: "Message deleted",
