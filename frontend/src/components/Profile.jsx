@@ -17,10 +17,16 @@ import useGetUserProfile from "@/hooks/useGetUserProfile";
 import { BACKEND_URL } from "../../configURL";
 import { setPosts, setSelectedPost } from "@/redux/postSlice";
 import { setAuthUser, setUserProfile } from "@/redux/authSlice";
+import useGetAllPost from "@/hooks/useGetAllPost";
+import useGetMutualFriends from "@/hooks/useGetMutualFriends";
 
 const Profile = () => {
+  
   const params = useParams();
   const userId = params.id;
+  useGetMutualFriends();
+  useGetUserProfile(userId);
+  useGetAllPost();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("posts");
   const { userProfile, user, mutualFriends } = useSelector((store) => store.auth);

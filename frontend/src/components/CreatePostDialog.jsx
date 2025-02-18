@@ -19,6 +19,7 @@ const CreatePostDialog = ({ open, setOpen }) => {
     const [loading, setLoading] = useState(false);
     const { user } = useSelector(store => store.auth);
     const { posts } = useSelector(store => store.post);
+    const [visibility, setVisibility] = useState("public");
     const dispatch = useDispatch();
 
     const fileChangeHandler = async (e) => {
@@ -65,7 +66,16 @@ const CreatePostDialog = ({ open, setOpen }) => {
                     </Avatar>
                     <div>
                         <h1 className="font-semibold text-sm">{user?.username}</h1>
-                        <span className="text-gray-500 text-xs">Friends</span>
+                        <span className="text-gray-500 text-xs">Visibility:</span>
+                        <select
+                            className="text-gray-500 text-xs bg-white border border-gray-300 rounded px-2 py-1 focus:outline-none"
+                            value={visibility}
+                            onChange={(e) => setVisibility(e.target.value)}
+                        >
+                            <option value="public">Public</option>
+                            <option value="private">Private</option>
+                            <option value="friends">Friends</option>
+                        </select>
                     </div>
                 </div>
                 <Textarea

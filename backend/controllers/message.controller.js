@@ -39,12 +39,12 @@ export const sendMessage = async (req, res) => {
         }
         else {
             let conversation = await Conversation.findOne({
-                participants: { $size: 2, $all: [senderId, receiverId] }
+                participants: [senderId]
             })
 
             if (!conversation) {
                 conversation = await Conversation.create({
-                    participants: [senderId, receiverId]
+                    participants: [senderId]
                 })
             }
             const newMessage = await Message.create({

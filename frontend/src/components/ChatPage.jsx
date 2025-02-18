@@ -23,7 +23,6 @@ const ChatPage = () => {
     const { user, selectedUser, allUsers } = useSelector(store => store.auth);
     const { onlineUsers, messages } = useSelector(store => store.chat);
     const [loading, setLoading] = useState(false);
-    const [selectedUserHighlight, setSelectedUserHighlight] = useState(null);
 
     const dispatch = useDispatch();
 
@@ -106,7 +105,7 @@ const ChatPage = () => {
     };
 
     return (
-        <div className='flex h-screen bg-gray-100'>
+        <div className='flex h-screen bg-gray-150'>
             <aside className='w-1/4 bg-white shadow-lg p-5 m-5 h-[700px] overflow-hidden border border-gray-300 rounded-2xl'>
                 <div className='sticky -top-5 z-10 bg-white -mx-1 border-b'>
                     <div className='flex gap-3 shadow-black items-center p-4 mb-4 -m-5 border-b bg-gray-200'>
@@ -138,7 +137,7 @@ const ChatPage = () => {
                                 const isOnline = onlineUsers.includes(allUser?._id);
                                 const isSelected = selectedUser?._id === allUser?._id;
                                 return (
-                                    <div key={allUser?._id} onClick={() => { dispatch(setSelectedUser(allUser)), setSelectedUserHighlight(allUser) }} className={`flex gap-3 items-center py-2 px-3 mb-1 hover:bg-gray-100 cursor-pointer rounded-full ${isSelected ? 'bg-gray-200 hover:bg-gray-200' : ''}`}>
+                                    <div key={allUser?._id} onClick={() => { dispatch(setSelectedUser(allUser)) }} className={`flex gap-3 items-center py-2 px-3 mb-1 hover:bg-gray-100 cursor-pointer rounded-full ${isSelected ? 'bg-gray-200 hover:bg-gray-200' : ''}`}>
                                         <Avatar className='w-12 h-12'>
                                             <AvatarImage src={allUser?.profilePicture} />
                                             <AvatarFallback>CN</AvatarFallback>

@@ -15,7 +15,6 @@ const useGetMutualFriends = () => {
                   withCredentials: true
                 })
                 if (res.data.success) {
-                  toast.success(res.data.message);
                   dispatch(setMutualFriends(res.data.mutual))
                 }
               } catch (error) {
