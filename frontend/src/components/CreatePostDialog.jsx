@@ -1,6 +1,7 @@
 import React, { useRef, useState } from 'react';
 import { Dialog, DialogContent, DialogHeader } from './ui/dialog';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
+import { IoMdPhotos } from "react-icons/io";
 import { Textarea } from './ui/textarea';
 import { Button } from './ui/button';
 import { useDispatch, useSelector } from 'react-redux';
@@ -35,6 +36,7 @@ const CreatePostDialog = ({ open, setOpen }) => {
         const formData = new FormData();
         formData.append('caption', caption);
         if (imagePreview) formData.append('image', file);
+        if (visibility) formData.append('visibility',visibility)
         try {
             setLoading(true);
             const res = await axios.post(`${BACKEND_URL}/api/v1/post/addpost`, formData, {
@@ -56,10 +58,10 @@ const CreatePostDialog = ({ open, setOpen }) => {
     };
 
     return (
-        <Dialog open={open}>
+        <Dialog open={open} onOpenChange={setOpen}>
             <DialogContent onInteractOutside={() => setOpen(false)} className="w-[400px] rounded-lg">
-                <DialogHeader className="text-center font-semibold text-lg">Create Post</DialogHeader>
-                <div className="flex items-center gap-2 p-2 border-b">
+                <DialogHeader className="text-center font-semibold text-lg pb-5 border-b">Create Post</DialogHeader>
+                <div className="flex items-center gap-2 p-2">
                     <Avatar>
                         <AvatarImage src={user?.profilePicture} alt="Profile" />
                         <AvatarFallback>U</AvatarFallback>
@@ -68,7 +70,7 @@ const CreatePostDialog = ({ open, setOpen }) => {
                         <h1 className="font-semibold text-sm">{user?.username}</h1>
                         <span className="text-gray-500 text-xs">Visibility:</span>
                         <select
-                            className="text-gray-500 text-xs bg-white border border-gray-300 rounded px-2 py-1 focus:outline-none"
+                            className="text-gray-500 text-xs mx-2 bg-white border border-gray-300 rounded px-2 py-1 focus:outline-none"
                             value={visibility}
                             onChange={(e) => setVisibility(e.target.value)}
                         >
@@ -81,7 +83,7 @@ const CreatePostDialog = ({ open, setOpen }) => {
                 <Textarea
                     value={caption}
                     onChange={(e) => setCaption(e.target.value)}
-                    className="focus-visible:ring-transparent border-none mt-2"
+                    className="focus-visible:ring-transparent border-none -mt-5 mb-7"
                     placeholder="What's on your mind?"
                 />
                 {imagePreview && (
@@ -89,10 +91,11 @@ const CreatePostDialog = ({ open, setOpen }) => {
                         <img src={imagePreview} alt="Preview" className="object-cover h-full w-full rounded-md" />
                     </div>
                 )}
-                <input ref={imageRef} type="file" className="hidden" onChange={fileChangeHandler} />
-                <div className="flex gap-4 items-center p-2 border-t">
+                <input ref={imageRef} type="file" className="hidden " onChange={fileChangeHandler} />
+                <div className="flex gap-4 justify-between items-center p-2 h-[50px] border rounded-lg">
+                    <div>Add to Post</div>
                     <button onClick={() => imageRef.current.click()} className="flex items-center gap-2 text-blue-500 text-sm font-semibold">
-                        <span className="bg-gray-200 p-1 rounded-full">📷</span> Photo/Video
+                        <span className="bg-gray-200 p-1 text-xl rounded-full"><IoMdPhotos/></span>
                     </button>
                 </div>
                 <Button onClick={createPostHandler} disabled={!caption && !imagePreview} className="w-full bg-blue-500 hover:bg-blue-600 mt-2">

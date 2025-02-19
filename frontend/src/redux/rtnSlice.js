@@ -30,7 +30,7 @@ const rtnSlice = createSlice({
       if(action.payload.text){
       state.notification.push(action.payload)
       }
-      if(action.payload.issharedpost){
+      if(action.payload.originalPost){
         state.notification.push(action.payload)
       }
     },

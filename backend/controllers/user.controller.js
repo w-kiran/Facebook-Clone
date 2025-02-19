@@ -791,3 +791,47 @@ export const getFriends = async (req, res) => {
         console.log(error)
     }
 }
+
+export const changePassword = async(req,res)=>{
+    try {
+      const userId = req.id;
+      const user = await User.findById(userId);
+      const {oldPassword} = req.body;
+      let {newPassword} = req.body
+  
+      if (!user) {
+        return res.status(404).json({ success: false, message: "User not found" });
+      }
+  
+      if(!oldPassword || !newPassword ){
+        return res.status(400).json({
+          message:'something is missing ',
+          success:false
+        })
+      }
+  
+      if(oldPassword && newPassword){
+        const isPasswordMatch = await bcrypt.compare(oldPassword,user.password);
+        if(!isPasswordMatch){
+          return res.status(400).json({
+            message:'!Password doesnot match !!',
+            success:false
+          })
+        }
+        else{
+          newPassword = await bcrypt.hash(newPassword, 10)
+          user.password = newPassword
+        }
+      }
+  
+      await user.save();
+  
+      return res.status(200).json({
+        message:'password changed successfully',
+        success:true
+      })
+      
+    } catch (error) {
+      console.log(error)
+    }
+  }

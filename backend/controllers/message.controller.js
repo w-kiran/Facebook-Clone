@@ -71,7 +71,7 @@ export const getMessages = async (req, res) => {
         const receiverId = req.params.id;
         const conversation = await Conversation.findOne({
             participants: { $all: [senderId, receiverId] }
-        }).sort({ createdAt: -1 }).populate('messages');
+        }).populate('messages');
         if (!conversation) return res.status(200).json({ success: true, messages: [] });
         return res.status(200).json({ success: true, messages: conversation?.messages });
 
@@ -107,13 +107,6 @@ export const deleteMessage = async (req, res) => {
         // deletedmessage.message="",
         deletedmessage.isDeleted = true,
             await deletedmessage.save()
-        // await Promise.all([
-        //     Message.findByIdAndDelete(messageId),
-        //     Conversation.updateOne(
-        //         { messages: messageId },
-        //         { $pull: { messages: messageId }}
-        //     )
-        // ]);
 
         const receiverSocketId = getReceiverSocketId(receiverId);
         if (receiverSocketId) {

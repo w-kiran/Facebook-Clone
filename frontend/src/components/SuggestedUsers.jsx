@@ -29,8 +29,8 @@ const SuggestedUsers = () => {
 
 
   return (
-    <div className='flex h-screen overflow-hidden'>
-      <div className='w-[25%]'>
+    <div className='flex h-screen overflow-hidden bg-gray-100'>
+      <div className='w-[25%] overflow-y-auto scrollbar-thin'>
         <LeftSideBar />
       </div>
 
@@ -60,7 +60,7 @@ const SuggestedUsers = () => {
           )}
         </div>
       </div>
-      <div className='w-[25%] overflow-y-auto'>
+      <div className='w-[25%] overflow-y-auto scrollbar-thin'>
         <RightSidebar />
       </div>
 

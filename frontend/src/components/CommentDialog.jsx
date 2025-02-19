@@ -118,7 +118,7 @@ if(!selectedPost?.originalPost){
 }else{
   return (
     <div>
-      <Dialog open={open}>
+      <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent onInteractOutside={() => setOpen(false)} className="max-w-5xl p-0 flex flex-col">
           <div className='flex flex-1'>
             <div className='w-1/2'>

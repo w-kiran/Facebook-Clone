@@ -11,6 +11,7 @@ const ShareDialog = ({ openShare, setOpenShare }) => {
     const [caption, setCaption] = useState("");
     const { user } = useSelector((state) => state.auth);
     const { selectedPost, posts } = useSelector(store => store.post);
+    const [visibility, setVisibility] = useState("public");
     const dispatch = useDispatch();
 
 
@@ -23,7 +24,7 @@ const ShareDialog = ({ openShare, setOpenShare }) => {
             if (!selectedPost.originalPost) {
                 const res = await axios.post(
                     `${BACKEND_URL}/api/v1/post/${selectedPost._id}/share`,
-                    { caption, visibility: "public" },
+                    { caption, visibility },
                     { withCredentials: true }
                 );
 
@@ -72,13 +73,17 @@ const ShareDialog = ({ openShare, setOpenShare }) => {
                         className="w-10 h-10 rounded-full"
                     />
                     <div>
-                        <p className="font-medium">{user?.username || "Guest"}</p>
-                        <div className="flex gap-2">
-                            <button className="bg-gray-200 px-2 py-1 text-xs rounded-md">Feed</button>
-                            <button className="bg-gray-200 px-2 py-1 text-xs flex items-center gap-1 rounded-md">
-                                <span className="material-icons text-sm">group</span> Friends ▼
-                            </button>
-                        </div>
+                        <h1 className="font-semibold text-sm">{user?.username}</h1>
+                        <span className="text-gray-500 text-xs">Visibility:</span>
+                        <select
+                            className="text-gray-500 text-xs mx-2 bg-white border border-gray-300 rounded px-2 py-1 focus:outline-none"
+                            value={visibility}
+                            onChange={(e) => setVisibility(e.target.value)}
+                        >
+                            <option value="public">Public</option>
+                            <option value="private">Private</option>
+                            <option value="friends">Friends</option>
+                        </select>
                     </div>
                 </div>
 

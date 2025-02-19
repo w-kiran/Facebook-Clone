@@ -6,6 +6,7 @@ export default defineConfig({
   plugins: [react()],
   server: {
     port: 6423, // Change from 5173 to 3000
+    host:true
   },
   resolve: {
     alias: {

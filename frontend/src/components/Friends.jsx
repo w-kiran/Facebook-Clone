@@ -1,9 +1,9 @@
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
-import useGetMyFriends from "@/hooks/usegetMyFriends";
 import LeftSideBar from "./LeftSidebar";
 import RightSidebar from "./RightSidebar";
+import useGetMyFriends from "@/hooks/useGetMyFriends";
 
 
 const Friends = () => {
@@ -12,8 +12,8 @@ const Friends = () => {
   const { userFriend } = useSelector(store => store.auth)
 
   return (
-    <div className='flex h-screen overflow-hidden'>
-      <div className='w-[25%]'>
+    <div className='flex h-screen overflow-hidden bg-gray-100'>
+      <div className='w-[25%] overflow-y-auto scrollbar-thin'>
         <LeftSideBar />
       </div>
       <div className='flex-grow overflow-auto border-x scrollbar-none'>
@@ -42,7 +42,7 @@ const Friends = () => {
           )}
         </div>
       </div>
-      <div className='w-[25%] overflow-y-auto'>
+      <div className='w-[25%] overflow-y-auto scrollbar-thin'>
         <RightSidebar />
       </div>
 

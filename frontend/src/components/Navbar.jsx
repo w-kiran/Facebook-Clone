@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
-import { Home, Video, ShoppingBag, Users, Bell, Search, Grid } from "lucide-react";
+import { Home, Video, ShoppingBag, Users, Bell, Search, Grid, HelpCircle, Settings, LogOut } from "lucide-react";
+import { IoHomeOutline, IoNotifications } from "react-icons/io5";
+import { FaFacebookMessenger } from "react-icons/fa";
 import { Avatar, AvatarImage, AvatarFallback } from "./ui/avatar";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
@@ -7,6 +9,12 @@ import axios from "axios";
 import { BACKEND_URL } from "../../configURL";
 import { Input } from "./ui/input";
 import { toast } from "sonner";
+import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
+import { MdDelete } from "react-icons/md";
+import { setPosts } from "@/redux/postSlice";
+import { setAuthUser } from "@/redux/authSlice";
+import { Button } from "./ui/button";
+import { setNotification } from "@/redux/rtnSlice";
 
 const Navbar = () => {
     const navigate = useNavigate();
@@ -15,6 +23,13 @@ const Navbar = () => {
     const [inputSearch, setInputSearch] = useState("");
     const [searchResults, setSearchResults] = useState([]);
     const [loading, setLoading] = useState(false);
+    const [activeTab, setActiveTab] = useState("home");
+    const [oldPassword, setOldPassword] = useState("");
+    const [newPassword, setNewPassword] = useState("");
+    const { notification } = useSelector((store) => store.rtn);
+    const [openProfile, setOpenProfile] = useState(false)
+    const [settingOpen, setSettingOpen] = useState(false)
+
 
     // Debounce effect to reduce API calls while typing
     useEffect(() => {
@@ -28,6 +43,42 @@ const Navbar = () => {
 
         return () => clearTimeout(delay);
     }, [inputSearch]);
+
+    const passwordHandler = async () => {
+        try {
+            const res = await axios.post(`${BACKEND_URL}/api/v1/user/changepassword`, {
+                oldPassword, newPassword
+            },
+                {
+                    withCredentials: true
+                }
+            )
+
+            if (res.data.success) {
+                toast.success(res.data.message)
+                setOldPassword("");
+                setNewPassword("")
+            }
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
+    const deleteAccountHandler = async () => {
+        try {
+            const res = await axios.delete(`${BACKEND_URL}/api/v1/user/deleteaccount`, {
+                withCredentials: true
+            })
+
+            if (res.data.success) {
+                toast.success(res.data.message);
+                dispatch(setAuthUser(null))
+                navigate('/signup')
+            }
+        } catch (error) {
+            console.log(error)
+        }
+    }
 
     const fetchSearchResults = async (query) => {
         setLoading(true);
@@ -51,17 +102,34 @@ const Navbar = () => {
 
     const navbarHandler = (name) => {
         if (name === "home") {
-          navigate("/");
+            navigate("/");
+            setActiveTab(name);
         } else if (name === "friends") {
-          navigate("/friends");
-        } else if (name === "video") {
-          navigate("/video");
-        } else if (name === "marketplace") {
-          navigate("/marketplace");
-        } else if (name === "game") {
-          navigate("/game");
+            navigate("/friends");
+            setActiveTab(name);
         }
-      };
+    };
+
+    const logOutHandler = async () => {
+        try {
+            const res = await axios.get(`${BACKEND_URL}/api/v1/user/logout`, {
+                withCredentials: true,
+            });
+            if (res.data.success) {
+                dispatch(setAuthUser(null));
+                dispatch(setPosts(null))
+                toast.success(res.data.message);
+                navigate("/login");
+            }
+        } catch (error) {
+            toast.error(error?.response?.data?.message);
+            console.log(error);
+        }
+    };
+
+    const clearNotificationHandler = () => {
+        dispatch(setNotification({ reaction: "clear" }));
+    };
 
     return (
         <nav className="bg-white shadow-md p-3 flex items-center justify-between sticky top-0 z-50">
@@ -107,33 +175,188 @@ const Navbar = () => {
             </div>
 
             {/* Middle Section: Navigation Icons */}
-            <div className="flex space-x-20 justify-center pr-40">
-                <button onClick={()=>navbarHandler("home")} className="p-2 rounded-full hover:bg-gray-200" title="Home">
-                    <Home size={22} />
+            <div className="flex space-x-[120px] items-center justify-center pr-[168px]">
+                <button
+                    onClick={() => navbarHandler("home")}
+                    className="relative flex flex-col items-center"
+                    title="Home"
+                >
+                    <IoHomeOutline className={activeTab === "home" ? "text-blue-500" : "text-gray-500"} size={22} />
+                    {activeTab === "home" && <div className="w-10 h-1 bg-blue-500 rounded-full mt-1"></div>}
                 </button>
-                <button onClick={()=>navbarHandler("video")} className="p-2 rounded-full hover:bg-gray-200" title="Videos">
-                    <Video size={22} />
+
+                <button
+                    onClick={() => navbarHandler("video")}
+                    className="relative flex flex-col items-center"
+                    title="Videos"
+                >
+                    <Video className={activeTab === "video" ? "text-blue-500" : "text-gray-500"} size={22} />
+                    {activeTab === "video" && <div className="w-10 h-1 bg-blue-500 rounded-full mt-1"></div>}
                 </button>
-                <button onClick={()=>navbarHandler("marketplace")}  className="p-2 rounded-full hover:bg-gray-200" title="Marketplace">
-                    <ShoppingBag size={22} />
+
+                <button
+                    onClick={() => navbarHandler("marketplace")}
+                    className="relative flex flex-col items-center"
+                    title="Marketplace"
+                >
+                    <ShoppingBag className={activeTab === "marketplace" ? "text-blue-500" : "text-gray-500"} size={22} />
+                    {activeTab === "marketplace" && <div className="w-10 h-1 bg-blue-500 rounded-full mt-1"></div>}
                 </button>
-                <button onClick={()=>navbarHandler("friends")}  className="p-2 rounded-full hover:bg-gray-200" title="Groups">
-                    <Users size={22} />
+
+                <button
+                    onClick={() => navbarHandler("friends")}
+                    className="relative flex flex-col items-center"
+                    title="Groups"
+                >
+                    <Users className={activeTab === "friends" ? "text-blue-500" : "text-gray-500"} size={22} />
+                    {activeTab === "friends" && <div className="w-10 h-1 bg-blue-500 rounded-full mt-1"></div>}
                 </button>
             </div>
 
             {/* Right Section: Menu, Notifications, and Avatar */}
-            <div className="flex items-center space-x-4">
-                <button className="p-2 rounded-full hover:bg-gray-200" title="Menu">
-                    <Grid size={22} />
+            <div className="flex items-center space-x-1">
+                <button onClick={() => navigate("/chat")} className="p-2 rounded-full hover:bg-gray-200" title="Menu">
+                    <FaFacebookMessenger size={22} />
                 </button>
-                <button className="p-2 rounded-full hover:bg-gray-200" title="Notifications">
-                    <Bell size={22} />
-                </button>
-                <Avatar className="w-10 h-10">
-                    <AvatarImage src={user?.profilePicture} />
-                    <AvatarFallback>CN</AvatarFallback>
-                </Avatar>
+                <div className="relative">
+                    <IoNotifications size={24} />
+                    {notification?.length > 0 && (
+                        <Popover>
+                            <PopoverTrigger asChild>
+                                <Button className="rounded-full h-5 w-5 bg-red-600 hover:bg-red-600 absolute bottom-6 ">
+                                    {notification?.length}
+                                </Button>
+                            </PopoverTrigger>
+                            <PopoverContent onInteractOutside={clearNotificationHandler}>
+                                <div>
+                                    {notification?.length === 0 ? (
+                                        <p>No new notification</p>
+                                    ) : (
+                                        notification &&
+                                        notification.map((notification) => {
+                                            return (
+                                                <div
+                                                    key={notification._id}
+                                                    className="flex items-center gap-2 my-2"
+                                                >
+                                                    <Avatar>
+                                                        <AvatarImage
+                                                            src={notification.author?.profilePicture}
+                                                        />
+                                                        <AvatarFallback>CN</AvatarFallback>
+                                                    </Avatar>
+                                                    <p className="text-sm">
+                                                        <span className="font-bold">
+                                                            {notification.author?.username}
+                                                        </span>{" "}
+                                                        {notification.reaction === "like" && (
+                                                            <span>react like on your post</span>
+                                                        )}
+                                                        {notification.reaction === "love" && (
+                                                            <span>react love on your post</span>
+                                                        )}
+                                                        {notification.reaction === "wow" && (
+                                                            <span>react wow on your post</span>
+                                                        )}
+                                                        {notification.reaction === "sad" && (
+                                                            <span>react sad on your post</span>
+                                                        )}
+                                                        {notification.reaction === "angry" && (
+                                                            <span>react angry on your post</span>
+                                                        )}
+                                                        {notification.reaction === "haha" && (
+                                                            <span>react haha on your post</span>
+                                                        )}
+                                                        {notification?.text && (
+                                                            <span>comment  on your post</span>
+                                                        )}
+                                                        {
+                                                            notification?.originalPost && (
+                                                                <span>share your post</span>
+                                                            )
+                                                        }
+                                                    </p>
+                                                </div>
+                                            );
+                                        })
+                                    )}
+                                </div>
+                            </PopoverContent>
+                        </Popover>
+                    )}
+                </div>
+
+                <div>
+                    <Popover>
+                        <PopoverTrigger asChild>
+                            <Avatar onClick={() => setOpenProfile(true)} className="w-7 h-7">
+                                <AvatarImage src={user?.profilePicture} />
+                                <AvatarFallback>CN</AvatarFallback>
+                            </Avatar>
+                        </PopoverTrigger>
+                        <PopoverContent onInteractOutside={() => setOpenProfile(false)}>
+                            <div className="flex flex-col cursor-pointer">
+
+
+                                <div className="flex">
+                                    <Avatar className="w-7 h-7">
+                                        <AvatarImage src={user?.profilePicture} />
+                                        <AvatarFallback>CN</AvatarFallback>
+                                    </Avatar>
+                                    <span className="ml-4">{user?.username}</span>
+                                </div>
+                                <hr className="border-b bg-black w-full my-2" />
+                                <span onClick={() => navigate(`profile/${user._id}`)} className="text-blue-500 font-semibold">See all profiles</span>
+
+                                <div className="flex items-center gap-2 mt-2">
+                                    <HelpCircle size={24} color="#422e2e" />
+                                    <span>Help & support</span>
+                                </div>
+
+                                <div onClick={() => setSettingOpen(!settingOpen)} className="flex items-center gap-2 mt-2">
+                                    <Settings size={24} color="#422e2e" />
+                                    <span>Settings & privacy</span>
+                                </div>
+
+                                {
+                                    settingOpen && (
+                                        <div className="flex flex-col mt-2">
+                                            <div onClick={deleteAccountHandler} className="flex items-center ">
+                                                <MdDelete size={24} />
+                                                <span className="ml-2">Delete account</span>
+                                            </div>
+                                            <div>
+                                                <div className="font-semibold text-lg mt-2">
+                                                    Change Password (Optional)
+                                                    <input
+                                                        type="password"
+                                                        placeholder="Old Password"
+                                                        className="border rounded-md p-1 h-[30px] text-sm w-full mt-2"
+                                                        value={oldPassword}
+                                                        onChange={(e) => setOldPassword(e.target.value)}
+                                                    />
+                                                    <input
+                                                        type="password"
+                                                        placeholder="New Password"
+                                                        className="border rounded-md p-1 h-[30px] text-sm w-full mt-2"
+                                                        value={newPassword}
+                                                        onChange={(e) => setNewPassword(e.target.value)}
+                                                    />
+                                                    <Button className='mt-2' onClick={passwordHandler}>Change Password</Button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )
+                                }
+                                <div onClick={logOutHandler} className="flex items-center gap-2 mt-2">
+                                    <LogOut size={24} color="#422e2e" />
+                                    <span>Logout</span>
+                                </div>
+                            </div>
+                        </PopoverContent>
+                    </Popover>
+
+                </div>
             </div>
         </nav>
     );

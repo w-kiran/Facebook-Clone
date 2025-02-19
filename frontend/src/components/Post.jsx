@@ -108,7 +108,7 @@ const Post = ({ post }) => {
 
     if (!post.originalPost) {
         return (
-            <Card className="relative my-10 w-full max-w-xl mx-auto border shadow-sm rounded-lg overflow-hidden">
+            <Card className="relative my-10 w-full max-w-xl mx-auto border z-10 shadow-sm rounded-lg overflow-hidden">
                 {/* Post Header */}
                 <div className="flex items-center justify-between pt-3 pl-3 pr-3">
                     <div className="flex items-center gap-3">
@@ -128,9 +128,8 @@ const Post = ({ post }) => {
                     }} className="cursor-pointer text-gray-600" />
                     {
                         threeDot && (
-                            <div className='absolute flex flex-col right-2 items-center ml-4
-                     top-14 bg-white shadow-md  w-2/3  border rounded-md z-20 gap-2 my-2 cursor-pointer'>
-                                <h2 className='mt-2'>Post Options</h2>
+                            <div className='absolute flex flex-col right-2 items-center ml-4 top-14 bg-white shadow-md  w-2/3  border rounded-md z-30 gap-2 my-2 cursor-pointer'>
+                                <h2 className='mt-2 border-b-2'>Post Options</h2>
                                 <h2 onClick={deletePostHandler}
                                     className='flex items-center mr-1'><RiDeleteBin6Line className='mr-1' />Delete Post</h2>
                                 <h2 onClick={bookmarkHandler} className='flex  items-center '> <IoBookmarkOutline className='mr-1' />Saved Post</h2>

@@ -14,6 +14,7 @@ import { io } from 'socket.io-client';
 import { BACKEND_URL } from '../configURL';
 import Friends from './components/Friends';
 import SuggestedUsers from './components/SuggestedUsers';
+import Saved from './components/Saved';
 
 const browserRouter = createBrowserRouter([
   {
@@ -31,6 +32,10 @@ const browserRouter = createBrowserRouter([
       {
         path: '/suggestedusers',
         element: <SuggestedUsers />
+      },
+      {
+        path: '/savedpost',
+        element: <Saved/>
       }
     ]
   },

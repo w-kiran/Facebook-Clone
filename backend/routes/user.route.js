@@ -1,5 +1,5 @@
 import express from "express";
-import { register,login, logout, getProfile, editProfile, SuggestedUser, friendOrUnfriend, searchUsers, deleteAccount, blockUsers, mutualFriends, getAllUsers, getFriends } from "../controllers/user.controller.js";
+import { register,login, logout, getProfile, editProfile, SuggestedUser, friendOrUnfriend, searchUsers, deleteAccount, blockUsers, mutualFriends, getAllUsers, getFriends, changePassword } from "../controllers/user.controller.js";
 import isAuth from "../middlewares/isAuth.js";
 import upload from "../middlewares/multer.js"
 
@@ -15,6 +15,7 @@ router.route('/getallusers').get(isAuth,getAllUsers)
 router.route('/friendorunfriend/:id').get(isAuth,friendOrUnfriend)
 router.route('/friends').get(isAuth,getFriends)
 router.route('/deleteaccount').delete(isAuth,deleteAccount)
+router.route('/changepassword').post(isAuth,changePassword)
 router.route('/blockuser').post(isAuth,blockUsers)
 router.route('/mutualfriend/:id').get(isAuth,mutualFriends)
 router.route('/search').post(isAuth,searchUsers)

@@ -48,7 +48,7 @@ const LeftSideBar = () => {
                 navigate('/suggestedusers');
                 break;
             case "Saved":
-                navigate('/saved');
+                navigate('/savedpost');
                 break;
             case "Groups":
                 navigate('/groups');

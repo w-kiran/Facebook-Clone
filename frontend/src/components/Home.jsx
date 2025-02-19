@@ -12,7 +12,7 @@ const Home = () => {
     useGetSuggestedUsers();
     return (
         <div className='flex justify-between h-screen bg-gray-100'>
-            <div className='w-[25%]'>
+            <div className='w-[25%] overflow-y-auto scrollbar-thin'>
                 <LeftSidebar/>
             </div>
             
@@ -20,7 +20,7 @@ const Home = () => {
                 <Feed/>
                 <Outlet />
             </div>
-            <div className='w-[25%] overflow-y-auto'>
+            <div className='w-[25%] overflow-y-auto scrollbar-thin'>
                 <RightSidebar />
             </div>
             

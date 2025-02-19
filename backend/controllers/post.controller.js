@@ -4,6 +4,7 @@ import { Comment } from "../models/comment.model.js"
 import sharp from "sharp"
 import cloudinary from "../utils/cloudinary.js";
 import { Reactions } from "../models/reaction.model.js";
+import { getReceiverSocketId, io } from "../socket/socket.js";
 
 export const addNewPost = async (req, res) => {
     try {
@@ -132,83 +133,187 @@ export const getAllPosts = async (req, res) => {
     }
 }
 
+// export const postReactions = async (req, res) => {
+//     try {
+//         const userId = req.id
+//         const postId = req.params.id;
+//         const post = await Post.findById(postId)
+//         const { reaction } = req.body;
+
+//         if (!reaction) {
+//             return res.status(401).json({
+//                 message: "Reaction Type null",
+//                 success: false
+//             })
+//         }
+//         if (!post) {
+//             return res.status(401).json({
+//                 message: "Post not found",
+//                 success: false
+//             })
+//         }
+
+//         const existingReaction = await Reactions.findOne({ author: userId, post: postId });
+//         if (existingReaction) {
+//             if (existingReaction.reaction === reaction) {
+//                 const exId = existingReaction._id;
+//                 await Reactions.deleteOne({ _id: existingReaction._id })
+//                 post.reactions = post.reactions.filter(id => id.toString() !== existingReaction._id.toString());
+//                 await post.save();
+//                 return res.status(200).json({
+//                     message: "Reaction removed",
+//                     success: true
+//                 });
+//             }
+//             else {
+//                 existingReaction.reaction = reaction
+//                 await existingReaction.save()
+//                 await post.save()
+//                 return res.status(200).json({
+//                     message: "Reaction updated",
+//                     success: true,
+//                 });
+//             }
+//         }
+//         // await post.updateOne({ $addToSet: { reactions: userId } })
+
+//         else {
+//             const reactioncreate = await Reactions.create({
+//                 reaction,
+//                 author: userId,
+//                 post: postId
+//             })
+
+//             // await reaction.populate({
+//             //     path: 'author',
+//             //     select: "username profilePicture"
+//             // })
+
+//             // await post.populate({
+//             //     path: reactions,
+//             //     populate: {
+//             //         path: 'author',
+//             //         select: "username profilePicture"
+//             //     }
+//             // })
+
+//             post.reactions.push(reactioncreate._id)
+//             await post.save()
+
+//             return res.status(200).json({
+//                 message: "Reaction Added",
+//                 success: true,
+//             })
+//         }
+
+
+//     } catch (error) {
+//         console.log(error);
+//     }
+// }
+
 export const postReactions = async (req, res) => {
     try {
-        const userId = req.id
+        const userId = req.id;
         const postId = req.params.id;
-        const post = await Post.findById(postId)
         const { reaction } = req.body;
 
-        if (!reaction) {
-            return res.status(401).json({
-                message: "Reaction Type null",
-                success: false
-            })
+        const validReactions = ["like", "love", "haha", "wow", "sad", "angry"];
+        if (!validReactions.includes(reaction)) {
+            return res.status(400).json({
+                message: "Invalid reaction type!",
+                success: false,
+            });
         }
+        const post = await Post.findById(postId);
         if (!post) {
-            return res.status(401).json({
-                message: "Post not found",
-                success: false
-            })
+            return res.status(404).json({
+                message: "Post not found!",
+                success: false,
+            });
         }
+        const existingReaction = await Reactions.findOne({
+            author: userId,
+            post: postId,
+        });
 
-        const existingReaction = await Reactions.findOne({ author: userId, post: postId });
         if (existingReaction) {
             if (existingReaction.reaction === reaction) {
-                await Reactions.deleteOne({ _id: existingReaction._id })
-                post.reactions = post.reactions.filter(id => id.toString() !== existingReaction._id.toString());
-                await post.save();
-                return res.status(200).json({
-                    message: "Reaction removed",
-                    success: true
+
+                await Post.updateOne(
+                    { _id: postId },
+                    { $pull: { reactions: existingReaction._id } }
+                );
+                const exId = existingReaction._id;
+                await existingReaction.deleteOne();
+
+                const postOwnerSocketId = post.author !== userId ? getReceiverSocketId(post.author) : null;
+                if (postOwnerSocketId) io.to(postOwnerSocketId).emit("notification", {
+                    exId,
+                    postId,
+                    userId,
+                    removed: true
                 });
-            }
-            else {
-                existingReaction.reaction = reaction
-                await existingReaction.save()
-                await post.save()
+
                 return res.status(200).json({
-                    message: "Reaction updated",
+                    message: "Reaction removed!",
                     success: true,
                 });
+            } else {
+                existingReaction.reaction = reaction;
+                existingReaction.populate({
+                    path: "author",
+                    select: "username profilePicture",
+                });
+
+                await existingReaction.save();
+
+                const postOwnerId = post.author.toString();
+                if (postOwnerId !== userId) {
+                    const postOwnerSocketId = getReceiverSocketId(postOwnerId);
+                    io.to(postOwnerSocketId).emit("notification", existingReaction);
+                }
+                return res.status(200).json({
+                    message: "Reaction updated!",
+                    success: true,
+                    reaction: existingReaction,
+                });
             }
         }
-        // await post.updateOne({ $addToSet: { reactions: userId } })
+        const newReaction = new Reactions({
+            reaction: reaction,
+            author: userId,
+            post: postId,
+        });
 
-        else {
-            const reactioncreate = await Reactions.create({
-                reaction,
-                author: userId,
-                post: postId
-            })
+        await Post.updateOne(
+            { _id: postId },
+            { $addToSet: { reactions: newReaction._id } }
+        );
 
-            // await reaction.populate({
-            //     path: 'author',
-            //     select: "username profilePicture"
-            // })
-
-            // await post.populate({
-            //     path: reactions,
-            //     populate: {
-            //         path: 'author',
-            //         select: "username profilePicture"
-            //     }
-            // })
-
-            post.reactions.push(reactioncreate._id)
-            await post.save()
-
-            return res.status(200).json({
-                message: "Reaction Added",
-                success: true,
-            })
+        await newReaction.populate({
+            path: "author",
+            select: "username profilePicture",
+        });
+        await newReaction.save();
+        let postOwnerId = post.author.toString();
+        if (postOwnerId !== userId) {
+            const postOwnerSocketId = getReceiverSocketId(postOwnerId);
+            io.to(postOwnerSocketId).emit("notification", newReaction);
         }
-
-
+        return res.status(201).json({
+            message: "Reaction added!",
+            success: true,
+            reaction: newReaction,
+        });
     } catch (error) {
-        console.log(error);
+        console.error(error);
+        return res.status(500).json({
+            message: "Internal server error",
+            success: false,
+        });
     }
-}
+};
 
 export const addComment = async (req, res) => {
     try {
@@ -239,6 +344,9 @@ export const addComment = async (req, res) => {
 
         post.comments.push(comment._id);
         await post.save()
+
+        const postOwnerSocketId = post.author !== userId ? getReceiverSocketId(post.author) : null
+        io.to(postOwnerSocketId).emit('notification', comment)
 
         return res.status(200).json({
             message: 'Comment is Added',
@@ -490,6 +598,10 @@ export const sharePost = async (req, res) => {
             }
         }
         ])
+        
+
+        const postOwnerSocketId = userId !== post.author ? getReceiverSocketId(post.author) : null
+        io.to(postOwnerSocketId).emit('notification', newpost)
 
         return res.status(200).json({
             message: "Post shared successfully",
@@ -505,3 +617,39 @@ export const sharePost = async (req, res) => {
         });
     }
 };
+
+export const getSavedPost = async (req, res) => {
+    try {
+        const userId = req.id;
+        const user = await User.findById(userId)
+
+        if (!user) {
+            return res.status(404).json({
+                message: "User not found",
+                success: false,
+            });
+        }
+
+        if (user.saved.length > 0) {
+            const userPost = await Post.find({ _id: { $in: [...user.saved] } })
+                .populate({
+                    path: "author",
+                    select: 'username profilePicture'
+                })
+
+            return res.status(200).json({
+                message: 'saved post found ',
+                success: true,
+                userPost
+            })
+        }
+
+        return res.status(404).json({
+            message: 'user donot have any saved post ',
+            success: false
+        })
+
+    } catch (error) {
+        console.log(error)
+    }
+}
