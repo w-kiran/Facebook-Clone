@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import blankcover from "../assets/blankcoverpic.png";
 import { RiDeleteBin6Line } from "react-icons/ri";
 import blankprofilepic from "../assets/blankprofilepic.png";
@@ -137,13 +137,13 @@ const Profile = () => {
           <img
             src={userProfile?.coverPhoto}
             alt="cover"
-            className="w-[70%] h-[100%] object-center ml-[15%] rounded-lg"
+            className="w-[96%] mx-auto md:w-[70%] h-[100%] object-center md:ml-[15%] rounded-lg"
           />
         ) : (
           <img
             src={blankcover}
             alt="cover"
-            className="w-[70%] h-[100%] object-center ml-[15%] rounded-lg"
+            className="md:w-[70%] w-[96%] h-[100%] object-center md:ml-[15%] rounded-lg"
           />
         )}
         {isLoggedInUserProfile && (
@@ -154,7 +154,7 @@ const Profile = () => {
       </div>
 
       {/* Profile Section */}
-      <div className="flex justify-between  bg-white p-6 shadow-md -mt-16 rounded-lg w-[70%]  mx-[10%]">
+      <div className="flex justify-between  bg-white md:p-6 shadow-md -mt-16 rounded-lg md:w-[70%] w-[96%] md:mx-[10%]">
         <div className="flex justify-start">
           <Avatar className="h-32 w-32 border-4 border-white shadow-lg">
             {userProfile && userProfile.profilePicture ? (
@@ -164,16 +164,19 @@ const Profile = () => {
             )}
             <AvatarFallback>CN</AvatarFallback>
           </Avatar>
-          <div className="flex flex-col ">
+          <div className="flex flex-col md:ml-14 mt-4">
             <h2 className="text-2xl font-bold mt-14 ml-12">
               {userProfile?.username}
             </h2>
-            <p onClick={() => handleTabChange("friends")} className="text-gray-500 mt-4 ml-12 mr-[135px] cursor-pointer border border-black">
+            {user?._id === userProfile._id && (<p onClick={() => handleTabChange("friends")} className="text-gray-500 mt-4 ml-12 mr-[135px] cursor-pointer">
               {userProfile?.friends?.length || 0} friends
-            </p>
+            </p>)}
+            {user?._id !== userProfile._id && (<p onClick={() => handleTabChange("friends")} className="text-gray-500 mt-4 ml-12 mr-[135px] cursor-pointer">
+              {userProfile?.friends?.length || 0} friends , {mutualFriends.length} mutual friends
+            </p>)}
           </div>
         </div>
-        <div className="mt-14 ml-6 flex gap-2">
+        <div className="md:mt-14 mt-24 -ml-[70px] flex gap-2">
           {isLoggedInUserProfile ? (
             <Button onClick={() => setOpen(!open)} variant="secondary">
               Edit Profile
@@ -192,8 +195,8 @@ const Profile = () => {
       </div>
 
       {/* Tabs */}
-      <div className="w-full max-w-5xl mt-6 ">
-        <div className="flex justify-center gap-10 border-b py-3 text-gray-600">
+      <div className="w-[96%] md:max-w-5xl mt-6 ">
+        <div className="flex justify-center md:gap-10 gap-2 border-b py-3 text-gray-600">
           {["posts", "about", "friends", "photos", "videos", "saved"].map(
             (tab) => (
               <span
@@ -209,9 +212,9 @@ const Profile = () => {
         </div>
       </div>
 
-      <div className="flex p-2 bg- w-2/3 gap-4 ">
+      <div className="flex p-2 w-2/3 md:gap-4 ">
         {/* Sidebar */}
-        <div className="flex flex-col w-[22%] border rounded-md  min-h-[200px] max-h-[400px]  p-2">
+        <div className="hidden md:flex flex-col md:w-[22%] border rounded-md  min-h-[200px] max-h-[400px]  p-2">
           <h2 className="font-semibold text-xl ">Intro</h2>
           <div className="flex flex-col items-center gap-2">
             <h3 className="mt-2">{userProfile?.username}</h3>
@@ -238,7 +241,7 @@ const Profile = () => {
         </div>
 
         {/* Dynamic Content Section */}
-        <div className="flex-1 bg-white">
+        <div className="flex-1 bg-white w-full">
           {activeTab === "photos" && (
             <div className="grid grid-cols-3 gap-4">
               {displayTab
@@ -256,7 +259,7 @@ const Profile = () => {
           )}
 
           {activeTab === "posts" && displayTab.length > 0 && (
-            <div className="flex flex-col w-full mt-2">
+            <div className="flex flex-col item-center justify-center w-[100%]">
               <div className="flex items-center justify-center">
                 {user?._id === userProfile?._id && <CreatePost />}
               </div>
@@ -380,7 +383,7 @@ const Profile = () => {
                           alt={friend?.username}
                         />
                         <AvatarFallback>
-                          {friend?.username.charAt(0)}
+                          {friend && friend?.username.charAt(0)}
                         </AvatarFallback>
                       </Avatar>
                     </div>
@@ -396,7 +399,7 @@ const Profile = () => {
               {user?._id !== userProfile._id &&
                 <div className="flex flex-col my-2 ">
                   <h1>Mutual Friends</h1>
-                  {mutualFriends.map((mutualfriend) => (
+                  {mutualFriends && mutualFriends.map((mutualfriend) => (
                     <div
                       className="hover:bg-gray-100 cursor-pointer  flex items-center justify-between gap-4 p-4"
                       key={mutualfriend._id}
@@ -431,6 +434,8 @@ const Profile = () => {
       <EditProfile open={open} setOpen={setOpen} userProfile={userProfile} />
     </div>
   );
+
 };
+
 
 export default Profile;

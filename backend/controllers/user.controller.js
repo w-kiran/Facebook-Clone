@@ -278,6 +278,7 @@ export const getProfile = async (req, res) => {
 //         console.log(error);
 //     }
 // }
+
 export const getAllUsers = async (req, res) => {
     try {
         const allUsers = await User.find().select("username profilePicture");
@@ -722,11 +723,8 @@ export const mutualFriends = async (req, res) => {
             })
         }
         const mutualFriends = myFriend.filter(friend => targetFriend.includes(friend))
-        console.log(mutualFriends);
         
         const populatedMutualFriends = await User.find({ _id: { $in: [...mutualFriends] } }).select("username profilePicture")
-        console.log(populatedMutualFriends);
-        
 
         return res.status(200).json({
             message:"Mutual friends fetched succesfully",

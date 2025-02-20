@@ -134,16 +134,16 @@ const Navbar = () => {
     return (
         <nav className="bg-white shadow-md p-3 flex items-center justify-between sticky top-0 z-50">
             {/* Left Section: Logo and Search */}
-            <div className="flex items-center space-x-3">
+            <div className="flex items-center md:space-x-3 ">
                 <img src="/fb.png" alt="logo" width={40} />
-                <div className="relative w-56 md:w-64">
+                <div className="relative mx-auto w-full md:w-full">
                     <Search className="absolute left-3 top-2.5 text-gray-400" size={18} />
                     <Input
                         type="text"
                         placeholder="Search users..."
                         value={inputSearch}
                         onChange={(e) => setInputSearch(e.target.value)}
-                        className="w-64 border p-2 rounded-md pl-10"
+                        className="border border-gray-300 rounded-full bg-gray-100 outline-none focus:outline-none focus:ring-0 focus:border-gray-300 focus:shadow-none md:w-[25%] w-20 focus:w-[100%] transition-all duration-300 pl-8"
                     />
                     {/* Display Search Results */}
                     {inputSearch.trim() && (
@@ -175,13 +175,13 @@ const Navbar = () => {
             </div>
 
             {/* Middle Section: Navigation Icons */}
-            <div className="flex space-x-[120px] items-center justify-center pr-[168px]">
+            <div className="flex md:space-x-[120px] items-center justify-center md:pr-[168px]">
                 <button
                     onClick={() => navbarHandler("home")}
-                    className="relative flex flex-col items-center"
+                    className="relative flex-col items-center hidden md:flex"
                     title="Home"
                 >
-                    <IoHomeOutline className={activeTab === "home" ? "text-blue-500" : "text-gray-500"} size={22} />
+                    <IoHomeOutline className={activeTab === "home" ? "text-blue-500" : "text-gray-500 hidden md:block"} size={22} />
                     {activeTab === "home" && <div className="w-10 h-1 bg-blue-500 rounded-full mt-1"></div>}
                 </button>
 
@@ -190,7 +190,7 @@ const Navbar = () => {
                     className="relative flex flex-col items-center"
                     title="Videos"
                 >
-                    <Video className={activeTab === "video" ? "text-blue-500" : "text-gray-500"} size={22} />
+                    <Video className={activeTab === "video" ? "text-blue-500" : "text-gray-500 hidden md:block"} size={22} />
                     {activeTab === "video" && <div className="w-10 h-1 bg-blue-500 rounded-full mt-1"></div>}
                 </button>
 
@@ -199,7 +199,7 @@ const Navbar = () => {
                     className="relative flex flex-col items-center"
                     title="Marketplace"
                 >
-                    <ShoppingBag className={activeTab === "marketplace" ? "text-blue-500" : "text-gray-500"} size={22} />
+                    <ShoppingBag className={activeTab === "marketplace" ? "text-blue-500" : "text-gray-500 hidden md:block"} size={22} />
                     {activeTab === "marketplace" && <div className="w-10 h-1 bg-blue-500 rounded-full mt-1"></div>}
                 </button>
 
@@ -208,17 +208,17 @@ const Navbar = () => {
                     className="relative flex flex-col items-center"
                     title="Groups"
                 >
-                    <Users className={activeTab === "friends" ? "text-blue-500" : "text-gray-500"} size={22} />
+                    <Users className={activeTab === "friends" ? "text-blue-500" : "text-gray-500 hidden md:block"} size={22} />
                     {activeTab === "friends" && <div className="w-10 h-1 bg-blue-500 rounded-full mt-1"></div>}
                 </button>
             </div>
 
             {/* Right Section: Menu, Notifications, and Avatar */}
             <div className="flex items-center space-x-1">
-                <button onClick={() => navigate("/chat")} className="p-2 rounded-full hover:bg-gray-200" title="Menu">
+                <button onClick={() => navigate("/chat")} className="p-2 rounded-full hover:bg-gray-200 hover:text-blue-500" title="Menu">
                     <FaFacebookMessenger size={22} />
                 </button>
-                <div className="relative">
+                <div className="relative rounded-full p-2 cursor-pointer hover:bg-gray-200 hover:text-blue-500">
                     <IoNotifications size={24} />
                     {notification?.length > 0 && (
                         <Popover>
@@ -289,7 +289,7 @@ const Navbar = () => {
                 <div>
                     <Popover>
                         <PopoverTrigger asChild>
-                            <Avatar onClick={() => setOpenProfile(true)} className="w-7 h-7">
+                            <Avatar onClick={() => setOpenProfile(true)} className="w-8 h-8 cursor-pointer mr-2">
                                 <AvatarImage src={user?.profilePicture} />
                                 <AvatarFallback>CN</AvatarFallback>
                             </Avatar>

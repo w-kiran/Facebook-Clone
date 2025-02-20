@@ -1,12 +1,11 @@
-import React from 'react'
 import courseraads from '../assets/courseraads.png'
 import schoolads from '../assets/schoolads.jpg'
 import useGetAllUsers from '@/hooks/useGetAllUsers'
 import { useSelector } from 'react-redux'
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar'
-import { setSelectedUser } from '@/redux/authSlice'
 import { GoDotFill } from "react-icons/go";
 import { useNavigate } from 'react-router-dom'
+import { setSelectedUser } from '@/redux/authSlice'
 
 const RightSidebar = () => {
   const navigate =useNavigate()
@@ -39,7 +38,10 @@ const RightSidebar = () => {
             const isOnline = onlineUsers.includes(allUser?._id);
             const isSelected = selectedUser?._id === allUser?._id;
             return (
-              <div key={allUser?._id} onClick={() => {navigate("/chat")}} className={`flex gap-3 bg-gray-100 items-center py-2 px-3 mb-1 hover:bg-gray-200 cursor-pointer rounded-full ${isSelected ? 'bg-gray-200 hover:bg-gray-200' : ''}`}>
+              <div key={allUser?._id} onClick={() => {
+                setSelectedUser(allUser); // Set the selected user
+                navigate("/chat"); // Navigate to chat page
+              }}  className={`flex gap-3 bg-gray-100 items-center py-2 px-3 mb-1 hover:bg-gray-200 cursor-pointer rounded-full ${isSelected ? 'bg-gray-200 hover:bg-gray-200' : ''}`}>
                 <Avatar className='w-12 h-12'>
                   <AvatarImage src={allUser?.profilePicture} />
                   <AvatarFallback>CN</AvatarFallback>

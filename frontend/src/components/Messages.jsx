@@ -17,6 +17,8 @@ const Messages = ({ selectedUser }) => {
     const { user } = useSelector(store => store.auth);
     const dispatch = useDispatch();
 
+    console.log("messages ", messages)
+
     const [openPopout, setOpenPopout] = useState(false); // State for popout visibility
 
     // Handle delete message
@@ -38,7 +40,7 @@ const Messages = ({ selectedUser }) => {
     };
 
     return (
-        <div className='flex-1 flex flex-col overflow-y-auto p-4 bg-gray-50'>
+        <div className='flex-1 flex flex-col overflow-y-auto bg-gray-50'>
 
             <div className='flex flex-col gap-3 overflow-y-auto scrollbar-thin px-4 py-2 h-full'>
                 <div className='flex justify-center mb-4'>

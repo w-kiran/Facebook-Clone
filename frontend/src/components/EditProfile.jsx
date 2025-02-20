@@ -9,6 +9,7 @@ import axios from "axios";
 import { toast } from "sonner";
 import { useParams } from "react-router-dom";
 import { BACKEND_URL } from "../../configURL";
+import { setAuthUser } from "@/redux/authSlice";
 
 const EditProfile = ({ open, setOpen, userProfile }) => {
   const { user } = useSelector((store) => store.auth);
@@ -18,6 +19,7 @@ const EditProfile = ({ open, setOpen, userProfile }) => {
   const [newPassword, setNewPassword] = useState("");
   const [profilePicture, setProfilePicture] = useState(null);
   const [coverPhoto, setCoverPhoto] = useState(null);
+  const dispatch = useDispatch()
 
   const [profilePreview, setProfilePreview] = useState(
     userProfile?.profilePicture || blankprofilepic
@@ -79,8 +81,9 @@ const EditProfile = ({ open, setOpen, userProfile }) => {
       if (res.data.success) {
         toast.success(res.data.message)
         setProfilePreview(res.data.user.profilePicture);
-    setCoverPreview(res.data.user.coverPhoto);
-    setBio(res.data.user.bio);
+        setCoverPreview(res.data.user.coverPhoto);
+        dispatch(setAuthUser(res.data.user))
+        setBio(res.data.user.bio);
       }
     } catch (error) {
       console.error("Error updating profile:", error);

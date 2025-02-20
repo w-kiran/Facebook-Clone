@@ -94,8 +94,8 @@ const CreatePostDialog = ({ open, setOpen }) => {
                 <input ref={imageRef} type="file" className="hidden " onChange={fileChangeHandler} />
                 <div className="flex gap-4 justify-between items-center p-2 h-[50px] border rounded-lg">
                     <div>Add to Post</div>
-                    <button onClick={() => imageRef.current.click()} className="flex items-center gap-2 text-blue-500 text-sm font-semibold">
-                        <span className="bg-gray-200 p-1 text-xl rounded-full"><IoMdPhotos/></span>
+                    <button onClick={() => imageRef.current.click()} className="flex items-center gap-2 text-blue-500 ">
+                        <span className="p-1 text-2xl rounded-full"><IoMdPhotos/></span>
                     </button>
                 </div>
                 <Button onClick={createPostHandler} disabled={!caption && !imagePreview} className="w-full bg-blue-500 hover:bg-blue-600 mt-2">

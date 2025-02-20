@@ -86,7 +86,7 @@ const LeftSideBar = () => {
         }
     };
     return (
-        <div className=" w-full flex flex-col sticky left-0 top-18 z-40 h-screen overflow-y-auto ">
+        <div className=" w-full flex flex-col sticky left-0 top-18 z-40 h-screen bg-gray-100 overflow-y-auto ">
             {
                 sidebarItems.map((item, index) => {
                     return (

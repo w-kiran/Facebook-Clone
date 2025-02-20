@@ -5,10 +5,14 @@ import { useNavigate } from "react-router-dom";
 import { BACKEND_URL } from "../../configURL";
 import LeftSideBar from "./LeftSidebar";
 import RightSidebar from "./RightSidebar";
+import { Button } from "./ui/button";
+import { MoreVertical } from "lucide-react";
 
 
 const SuggestedUsers = () => {
   const [friends, setFriends] = useState([]);
+  const [hiddenLeft, setHiddenLeft] = useState(false)
+  const [hiddenRight, setHiddenRight] = useState(false)
   const navigate = useNavigate();
   useEffect(() => {
     const fetchSuggestedUsers = async () => {
@@ -30,13 +34,25 @@ const SuggestedUsers = () => {
 
   return (
     <div className='flex h-screen overflow-hidden bg-gray-100'>
-      <div className='w-[25%] overflow-y-auto scrollbar-thin'>
+      {/* Left Sidebar - Overlay when toggled */}
+      <div
+        className={`fixed top-0 left-0 h-full w-full md:w-[25%] overflow-y-auto scrollbar-thin shadow-lg transition-transform duration-300 z-50 ${hiddenLeft ? "translate-x-0" : "-translate-x-full"
+          } md:static md:translate-x-0`}
+      >
         <LeftSideBar />
       </div>
 
+      {/* Left Sidebar Toggle Button */}
+      <Button
+        className="absolute w-2 top-20 z-50 md:hidden"
+        onClick={() => setHiddenLeft(!hiddenLeft)}
+      >
+        <MoreVertical />
+      </Button>
+
       <div className='flex-grow overflow-auto border-x scrollbar-none'>
         <div className="w-full flex flex-col mx-auto">
-          <div className=" text-2xl border-b p-5 ">Suggested Friends</div>
+          <div className=" text-2xl border-b p-5 md:pl-5 pl-[60px] ">Suggested Friends</div>
           <hr />
           {friends.length === 0 ? (
             <p className="text-gray-500">No suggested friends available.</p>
@@ -60,9 +76,21 @@ const SuggestedUsers = () => {
           )}
         </div>
       </div>
-      <div className='w-[25%] overflow-y-auto scrollbar-thin'>
+      {/* Right Sidebar - Overlay when toggled */}
+      <div
+        className={`fixed top-0 right-0 h-full w-full md:w-[25%] bg-gray-100 overflow-y-auto scrollbar-thin shadow-lg transition-transform duration-300 z-50 ${hiddenRight ? "translate-x-0" : "translate-x-full"
+          } md:static md:translate-x-0`}
+      >
         <RightSidebar />
       </div>
+
+      {/* Right Sidebar Toggle Button */}
+      <Button
+        className="absolute w-2 top-20 right-0 z-50 md:hidden"
+        onClick={() => setHiddenRight(!hiddenRight)}
+      >
+        <MoreVertical />
+      </Button>
 
     </div>
 

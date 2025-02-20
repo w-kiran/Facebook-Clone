@@ -4,7 +4,7 @@ import Navbar from './Navbar.jsx'
 
 const MainLayout = () => {
   return (
-    <div className='flex flex-col h-screen overflow-y-auto'>
+    <div className='flex flex-col h-screen overflow-y-auto z-90'>
       <Navbar/>
       <div className="flex-grow h-screen overflow-hidden">
         <Outlet/>

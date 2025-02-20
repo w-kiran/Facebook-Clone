@@ -106,38 +106,37 @@ const ChatPage = () => {
 
     return (
         <div className='flex h-screen bg-gray-150'>
-            <aside className='w-1/4 bg-white shadow-lg p-5 m-5 h-[700px] overflow-hidden border border-gray-300 rounded-2xl'>
-                <div className='sticky -top-5 z-10 bg-white -mx-1 border-b'>
-                    <div className='flex gap-3 shadow-black items-center p-4 mb-4 -m-5 border-b bg-gray-200'>
-                        <Avatar>
-                            <AvatarImage src={user?.profilePicture} alt='profile' />
-                            <AvatarFallback>CN</AvatarFallback>
-                        </Avatar>
-                        <div className='flex flex-col'>
-                            <span className='font-medium'>{user?.username}</span>
-                        </div>
-                    </div>
-                    <h1 className='font-bold text-xl mb-4'>Chats</h1>
-                    <div className="relative w-56 md:w-64 mb-6">
-                        <Search className="absolute left-3 top-2.5 text-gray-500" size={18} />
-                        <Input type="text"
-                            placeholder="Search users..."
-                            value={inputSearch}
-                            onChange={(e) => setInputSearch(e.target.value)}
-                            onFocus={() => setInputTrigger(true)}
-                            onBlur={() => setInputTrigger(false)}
-                            className="rounded-3xl pl-10 w-[343px]"
-                        />
+            <aside className={selectedUser ? 'hidden md:block md:w-1/4  bg-white shadow-lg p-5 md:m-5 m-1  w-full  overflow-hidden border border-gray-300 rounded-2xl' : ' md:w-1/4  bg-white shadow-lg p-5 md:m-5 m-1  w-full  overflow-hidden border border-gray-300 rounded-2xl md:block'}>                <div className='sticky w-full -top-5 z-10 bg-white -mx-1 border-b'>
+                <div className='flex gap-3 shadow-black items-center p-4 mb-4 -m-5 border-b bg-gray-200'>
+                    <Avatar>
+                        <AvatarImage src={user?.profilePicture} alt='profile' />
+                        <AvatarFallback>CN</AvatarFallback>
+                    </Avatar>
+                    <div className='flex flex-col'>
+                        <span className='font-medium'>{user?.username}</span>
                     </div>
                 </div>
-                <div className='overflow-y-auto w-[360px] h-[calc(640px-150px)] scrollbar-thin pr-2'>
+                <h1 className='font-bold text-xl mb-4'>Chats</h1>
+                <div className="relative w-full mx-auto  mb-6">
+                    <Search className="absolute left-3 top-2.5 text-gray-500" size={18} />
+                    <Input type="text"
+                        placeholder="Search users..."
+                        value={inputSearch}
+                        onChange={(e) => setInputSearch(e.target.value)}
+                        onFocus={() => setInputTrigger(true)}
+                        onBlur={() => setInputTrigger(false)}
+                        className="rounded-3xl pl-10 w-full"
+                    />
+                </div>
+            </div>
+                <div className='overflow-y-auto w-full h-[calc(640px-150px)] scrollbar-thin pr-2'>
                     {!inputTrigger ? (
-                        <div className='mt-1'>
-                            {allUsers.map((allUser) => {
+                        <div className='mt-1 w-[100%]'>
+                            {allUsers && allUsers.map((allUser) => {
                                 const isOnline = onlineUsers.includes(allUser?._id);
                                 const isSelected = selectedUser?._id === allUser?._id;
                                 return (
-                                    <div key={allUser?._id} onClick={() => { dispatch(setSelectedUser(allUser)) }} className={`flex gap-3 items-center py-2 px-3 mb-1 hover:bg-gray-100 cursor-pointer rounded-full ${isSelected ? 'bg-gray-200 hover:bg-gray-200' : ''}`}>
+                                    <div key={allUser?._id} onClick={() => { dispatch(setSelectedUser(allUser)) }} className={`flex w-[100%] mx-auto gap-3 items-center py-2 px-3 mb-1 hover:bg-gray-100 cursor-pointer rounded-full ${isSelected ? 'bg-gray-200 hover:bg-gray-200' : ''}`}>
                                         <Avatar className='w-12 h-12'>
                                             <AvatarImage src={allUser?.profilePicture} />
                                             <AvatarFallback>CN</AvatarFallback>
@@ -178,10 +177,11 @@ const ChatPage = () => {
                     }</div>
             </aside>
 
-            <main className='flex-1 flex flex-col h-[700px] bg-white shadow-lg rounded-2xl border border-gray-300 m-5 -ml-2 overflow-hidden'>
+            <main className={selectedUser ? 'flex-1 relative flex flex-col  bg-white shadow-lg rounded-2xl border border-gray-300 m-5  overflow-hidden w-full ' : 'hidden  relative md:flex   bg-white shadow-lg rounded-2xl border border-gray-300 m-5  overflow-hidden w-full '}>
                 {selectedUser ? (
-                    <section className='flex flex-col h-full w-[1125px] -ml-3'>
-                        <div className='flex gap-3 ml-3 items-center p-4 border-b border-gray-300 bg-gray-200'>
+                    <section className='flex flex-col h-full w-full'>
+                        <div className='flex gap-3 items-center p-4 border-b border-gray-300 bg-gray-200'>
+                            <button onClick={() => { dispatch(setSelectedUser(null)) }} className='block md:hidden'>Back</button>
                             <Avatar>
                                 <AvatarImage src={selectedUser?.profilePicture} alt='profile' />
                                 <AvatarFallback>CN</AvatarFallback>
@@ -191,11 +191,11 @@ const ChatPage = () => {
                             </div>
                         </div>
                         <Messages selectedUser={selectedUser} />
-                        <div className='flex items-center mx-3 p-4 border-t'>
+                        <div className='flex items-center p-4 border-t'>
                             <Input value={textMessage} onChange={(e) => setTextMessage(e.target.value)} type="text" className='flex-1 mr-2 focus-visible:ring-transparent rounded-full' placeholder="Type a message..." />
                             {textMessage ?
-                                <PiPaperPlaneRightFill className='cursor-pointer text-blue-500 w-7 h-7 ' onClick={() => sendMessageHandler(selectedUser?._id)}/>
-                                : <FaThumbsUp className='cursor-pointer text-blue-500 w-6 h-6 ml-1' onClick={() => likeHandler(selectedUser?._id)}/>}
+                                <PiPaperPlaneRightFill className='cursor-pointer text-blue-500 w-7 h-7 ' onClick={() => sendMessageHandler(selectedUser?._id)} />
+                                : <FaThumbsUp className='cursor-pointer text-blue-500 w-6 h-6 ml-1' onClick={() => likeHandler(selectedUser?._id)} />}
                         </div>
                     </section>
                 ) : (
