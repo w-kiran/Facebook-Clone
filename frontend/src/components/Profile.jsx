@@ -164,21 +164,21 @@ const Profile = () => {
             )}
             <AvatarFallback>CN</AvatarFallback>
           </Avatar>
-          <div className="flex flex-col md:ml-14 mt-4">
-            <h2 className="text-2xl font-bold mt-14 ml-12">
+          <div className="flex flex-col ml-5 mt-4">
+            <h2 className="md:text-2xl font-bold mt-14 md:mt-9">
               {userProfile?.username}
             </h2>
-            {user?._id === userProfile._id && (<p onClick={() => handleTabChange("friends")} className="text-gray-500 mt-4 ml-12 mr-[135px] cursor-pointer">
+            {user?._id === userProfile._id && (<p onClick={() => handleTabChange("friends")} className="md:text-md text-xs text-gray-500 mt-2 md:mr-[135px] cursor-pointer">
               {userProfile?.friends?.length || 0} friends
             </p>)}
-            {user?._id !== userProfile._id && (<p onClick={() => handleTabChange("friends")} className="text-gray-500 mt-4 ml-12 mr-[135px] cursor-pointer">
+            {user?._id !== userProfile._id && (<p onClick={() => handleTabChange("friends")} className="text-gray-500 mt-4 mr-[135px] cursor-pointer">
               {userProfile?.friends?.length || 0} friends , {mutualFriends.length} mutual friends
             </p>)}
           </div>
         </div>
-        <div className="md:mt-14 mt-24 -ml-[70px] flex gap-2">
+        <div className="md:mt-14 mt-[75px] mr-5 md:ml-6 flex gap-2">
           {isLoggedInUserProfile ? (
-            <Button onClick={() => setOpen(!open)} variant="secondary">
+            <Button onClick={() => setOpen(!open)} variant="secondary" className="text-xs w-17 h-7">
               Edit Profile
             </Button>
           ) : (
@@ -196,7 +196,7 @@ const Profile = () => {
 
       {/* Tabs */}
       <div className="w-[96%] md:max-w-5xl mt-6 ">
-        <div className="flex justify-center md:gap-10 gap-2 border-b py-3 text-gray-600">
+        <div className="flex justify-center md:gap-10 gap-2 border-b py-3 text-sm text-gray-600">
           {["posts", "about", "friends", "photos", "videos", "saved"].map(
             (tab) => (
               <span
@@ -212,7 +212,7 @@ const Profile = () => {
         </div>
       </div>
 
-      <div className="flex p-2 w-2/3 md:gap-4 ">
+      <div className="flex p-2 w-[96] bg-gray-100 d:w-2/3 md:gap-4 ">
         {/* Sidebar */}
         <div className="hidden md:flex flex-col md:w-[22%] border rounded-md  min-h-[200px] max-h-[400px]  p-2">
           <h2 className="font-semibold text-xl ">Intro</h2>
@@ -241,7 +241,7 @@ const Profile = () => {
         </div>
 
         {/* Dynamic Content Section */}
-        <div className="flex-1 bg-white w-full">
+        <div className="flex-1 bg-gray-100 w-full">
           {activeTab === "photos" && (
             <div className="grid grid-cols-3 gap-4">
               {displayTab
@@ -259,8 +259,8 @@ const Profile = () => {
           )}
 
           {activeTab === "posts" && displayTab.length > 0 && (
-            <div className="flex flex-col item-center justify-center w-[100%]">
-              <div className="flex items-center justify-center">
+            <div className="flex flex-col item-center justify-center w-[96%] mx-auto">
+              <div className="flex items-center justify-center mt-5">
                 {user?._id === userProfile?._id && <CreatePost />}
               </div>
               <div className="-mb-10">

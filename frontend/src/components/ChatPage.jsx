@@ -4,7 +4,7 @@ import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 import { setSelectedUser } from '../redux/authSlice';
 import { Input } from './ui/input';
 import { Button } from './ui/button';
-import { MessageCircleCode, Search } from 'lucide-react';
+import { DeleteIcon, MessageCircleCode, MoreHorizontal, MoveLeftIcon, Search } from 'lucide-react';
 import Messages from './Messages';
 import axios from 'axios';
 import { setMessages } from '../redux/chatSlice';
@@ -13,6 +13,9 @@ import { FaThumbsUp, FaRegThumbsUp } from 'react-icons/fa'; // Import icons
 import { FaArrowLeft } from 'react-icons/fa';  // Import back arrow icon
 import { PiPaperPlaneRightFill } from "react-icons/pi";
 import useGetAllUsers from '@/hooks/useGetAllUsers';
+import { useNavigate } from 'react-router-dom';
+import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
+import { toast } from 'sonner';
 
 const ChatPage = () => {
     useGetAllUsers();
@@ -22,7 +25,9 @@ const ChatPage = () => {
     const [searchResults, setSearchResults] = useState([]);
     const { user, selectedUser, allUsers } = useSelector(store => store.auth);
     const { onlineUsers, messages } = useSelector(store => store.chat);
+    const [chatOptionOpen, setChatOptionOpen] = useState(false);
     const [loading, setLoading] = useState(false);
+    const navigate = useNavigate()
 
     const dispatch = useDispatch();
 
@@ -39,6 +44,19 @@ const ChatPage = () => {
     }, [inputSearch]);
 
 
+    const deleteConversationHandler = async()=>{
+        try {
+           const res = await axios.delete(`${BACKEND_URL}/api/v1/message/${selectedUser._id}/deleteconvo`,
+               {withCredentials:true}
+           )
+           if(res.data.success){
+                   dispatch(setSelectedUser(null))
+                   toast.success(res.data.message)
+           }
+        } catch (error) {
+           console.log(error)
+        }
+     }
     const fetchSearchResults = async (query) => {
         setLoading(true);
         try {
@@ -107,7 +125,7 @@ const ChatPage = () => {
     return (
         <div className='flex h-screen bg-gray-150'>
             <aside className={selectedUser ? 'hidden md:block md:w-1/4  bg-white shadow-lg p-5 md:m-5 m-1  w-full  overflow-hidden border border-gray-300 rounded-2xl' : ' md:w-1/4  bg-white shadow-lg p-5 md:m-5 m-1  w-full  overflow-hidden border border-gray-300 rounded-2xl md:block'}>                <div className='sticky w-full -top-5 z-10 bg-white -mx-1 border-b'>
-                <div className='flex gap-3 shadow-black items-center p-4 mb-4 -m-5 border-b bg-gray-200'>
+                {/* <div className='flex gap-3 shadow-black items-center p-4 mb-4 -m-5 border-b bg-gray-200'>
                     <Avatar>
                         <AvatarImage src={user?.profilePicture} alt='profile' />
                         <AvatarFallback>CN</AvatarFallback>
@@ -115,7 +133,19 @@ const ChatPage = () => {
                     <div className='flex flex-col'>
                         <span className='font-medium'>{user?.username}</span>
                     </div>
-                </div>
+                </div> */}
+                <div className="flex justify-between gap-3 shadow-black items-center p-4 mb-4 -m-5 border-b bg-gray-200">
+            <div className="flex items-center">
+            <Avatar>
+              <AvatarImage src={user?.profilePicture} alt="profile" />
+              <AvatarFallback>CN</AvatarFallback>
+            </Avatar>
+              <span className="font-medium ml-4">{user?.username}</span>
+            </div>
+           <div onClick={()=>{navigate('/')}}>
+           <MoveLeftIcon/>
+           </div>
+          </div>
                 <h1 className='font-bold text-xl mb-4'>Chats</h1>
                 <div className="relative w-full mx-auto  mb-6">
                     <Search className="absolute left-3 top-2.5 text-gray-500" size={18} />
@@ -186,9 +216,28 @@ const ChatPage = () => {
                                 <AvatarImage src={selectedUser?.profilePicture} alt='profile' />
                                 <AvatarFallback>CN</AvatarFallback>
                             </Avatar>
-                            <div className='flex flex-col'>
+
+                            <div className="flex justify-between w-full">
+                <span className="font-medium">{selectedUser?.username}</span>
+                <Popover >
+                  <PopoverTrigger>
+                    <MoreHorizontal
+                      onClick={() => setChatOptionOpen(!chatOptionOpen)}
+                    />
+                  </PopoverTrigger>
+                  <PopoverContent>
+                    <div className="flex items-center flex-col cursor-pointer">
+                    <div onClick={() => dispatch(setSelectedUser(null))}
+                     className="flex item"><MoveLeftIcon className="mr-2"/> back</div>
+                    <div onClick={deleteConversationHandler}
+                     className="flex item"><DeleteIcon className="mr-2"/>Delete Conversation</div>
+                    </div>
+                  </PopoverContent>
+                </Popover>
+              </div>
+                            {/* <div className='flex flex-col'>
                                 <span className='font-medium'>{selectedUser?.username}</span>
-                            </div>
+                            </div> */}
                         </div>
                         <Messages selectedUser={selectedUser} />
                         <div className='flex items-center p-4 border-t'>

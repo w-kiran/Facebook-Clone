@@ -17,8 +17,6 @@ const Messages = ({ selectedUser }) => {
     const { user } = useSelector(store => store.auth);
     const dispatch = useDispatch();
 
-    console.log("messages ", messages)
-
     const [openPopout, setOpenPopout] = useState(false); // State for popout visibility
 
     // Handle delete message

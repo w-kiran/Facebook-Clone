@@ -108,7 +108,7 @@ const Post = ({ post }) => {
 
     if (!post.originalPost) {
         return (
-            <Card className="relative my-2 md:my-10 w-full max-w-xl mx-auto border z-10 shadow-sm rounded-lg overflow-hidden">
+            <Card className="relative my-10 w-full md:max-w-xl mx-auto border shadow-sm rounded-lg overflow-hidden">
                 {/* Post Header */}
                 <div className="flex items-center justify-between pt-3 pl-3 pr-3">
                     <div className="flex items-center gap-3">

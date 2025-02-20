@@ -18,7 +18,7 @@ const Home = () => {
         <div className="relative flex h-screen bg-gray-100">
             {/* Left Sidebar - Overlay when toggled */}
             <div
-                className={`fixed top-0 left-0 h-full w-full md:w-[25%] overflow-y-auto scrollbar-thin shadow-lg transition-transform duration-300 z-20 ${
+                className={`fixed top-50 left-0 h-full w-full md:w-[25%] overflow-y-auto scrollbar-thin shadow-lg transition-transform duration-300 z-20 ${
                     hiddenLeft ? "translate-x-0" : "-translate-x-full"
                 } md:static md:translate-x-0`}
             >
@@ -41,7 +41,7 @@ const Home = () => {
 
             {/* Right Sidebar - Overlay when toggled */}
             <div
-                className={`fixed top-0 right-0 h-full w-full md:w-[25%] bg-gray-100 overflow-y-auto scrollbar-thin shadow-lg transition-transform duration-300 z-20 ${
+                className={`fixed top-50 right-0 h-full w-full md:w-[25%] bg-gray-100 overflow-y-auto scrollbar-thin shadow-lg transition-transform duration-300 z-20 ${
                     hiddenRight ? "translate-x-0" : "translate-x-full"
                 } md:static md:translate-x-0`}
             >

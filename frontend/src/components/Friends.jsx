@@ -10,8 +10,8 @@ import { MoreVertical } from "lucide-react";
 
 
 const Friends = () => {
-      const [hiddenLeft,setHiddenLeft]=useState(false)
-      const [hiddenRight,setHiddenRight]=useState(false)
+  const [hiddenLeft, setHiddenLeft] = useState(false)
+  const [hiddenRight, setHiddenRight] = useState(false)
   const navigate = useNavigate();
   useGetMyFriends()
   const { userFriend } = useSelector(store => store.auth)
@@ -20,20 +20,19 @@ const Friends = () => {
     <div className='flex h-screen overflow-hidden bg-gray-100'>
       {/* Left Sidebar - Overlay when toggled */}
       <div
-                className={`fixed top-0 left-0 h-full w-full md:w-[25%] bg-white overflow-y-auto scrollbar-thin shadow-lg transition-transform duration-300 z-50 ${
-                    hiddenLeft ? "translate-x-0" : "-translate-x-full"
-                } md:static md:translate-x-0`}
-            >
-                <LeftSideBar />
-            </div>
+        className={`fixed top-50 left-0 h-full w-full md:w-[25%] bg-white overflow-y-auto scrollbar-thin shadow-lg transition-transform duration-300 z-50 ${hiddenLeft ? "translate-x-0" : "-translate-x-full"
+          } md:static md:translate-x-0`}
+      >
+        <LeftSideBar />
+      </div>
 
-            {/* Left Sidebar Toggle Button */}
-            <Button
-                className="absolute w-2 top-20 z-50 md:hidden"
-                onClick={() => setHiddenLeft(!hiddenLeft)}
-            >
-                <MoreVertical />
-            </Button>
+      {/* Left Sidebar Toggle Button */}
+      <Button
+        className="absolute w-2 top-50 z-50 md:hidden"
+        onClick={() => setHiddenLeft(!hiddenLeft)}
+      >
+        <MoreVertical />
+      </Button>
       <div className='flex-grow overflow-auto items-center justify-center border-x scrollbar-none'>
         <div className="w-full flex flex-col mx-auto">
           <div className=" text-2xl border-b p-5 pl-[60px] md:pl-5">Friends</div>
@@ -62,20 +61,19 @@ const Friends = () => {
       </div>
       {/* Right Sidebar - Overlay when toggled */}
       <div
-                className={`fixed top-0 right-0 h-full w-full md:w-[25%] bg-white overflow-y-auto scrollbar-thin shadow-lg transition-transform duration-300 z-50 ${
-                    hiddenRight ? "translate-x-0" : "translate-x-full"
-                } md:static md:translate-x-0`}
-            >
-                <RightSidebar />
-            </div>
+        className={`fixed top-50 right-0 h-full w-full md:w-[25%] bg-white overflow-y-auto scrollbar-thin shadow-lg transition-transform duration-300 z-50 ${hiddenRight ? "translate-x-0" : "translate-x-full"
+          } md:static md:translate-x-0`}
+      >
+        <RightSidebar />
+      </div>
 
-            {/* Right Sidebar Toggle Button */}
-            <Button
-                className="absolute w-2 top-20 right-0 z-50 md:hidden"
-                onClick={() => setHiddenRight(!hiddenRight)}
-            >
-                <MoreVertical />
-            </Button>
+      {/* Right Sidebar Toggle Button */}
+      <Button
+        className="absolute w-2 top-50 right-0 z-50 md:hidden"
+        onClick={() => setHiddenRight(!hiddenRight)}
+      >
+        <MoreVertical />
+      </Button>
 
     </div>
 

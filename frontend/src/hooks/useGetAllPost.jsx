@@ -12,7 +12,6 @@ const useGetAllPost = () => {
             try {
                 const res = await axios.get(`${BACKEND_URL}/api/v1/post/getallposts`, { withCredentials: true });
                 if (res.data.success) { 
-                    console.log(res.data.post);
                     dispatch(setPosts(res.data.post));
                 }
             } catch (error) {

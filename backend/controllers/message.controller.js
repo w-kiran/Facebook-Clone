@@ -144,8 +144,8 @@ export const deleteConversation = async (req, res) => {
             Conversation.findByIdAndDelete(conversation._id.toString()),
             Message.deleteMany({
                 $or: [
-                    { senderID: userId, receiverID: targetUser },
-                    { senderID: targetUser, receiverID: userId }
+                    { senderId: userId, receiverId: targetUser },
+                    { senderId: targetUser, receiverId: userId }
                 ]
             })
 
