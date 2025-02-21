@@ -11,13 +11,6 @@ import path from "path";
 
 dotenv.config({})
 
-app.get("/",(req,res)=>{
-    return res.status(200).json({
-        message:"I'm coming from backend",
-        success:true
-    })
-})
-
 const __dirname = path.resolve();
 
 app.use(express.json())
