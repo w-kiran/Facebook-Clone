@@ -12,8 +12,8 @@ import { toast } from "sonner";
 import axios from "axios";
 import { useDispatch, useSelector } from "react-redux";
 import { BACKEND_URL } from "../../configURL";
-import { setAuthUser } from "@/redux/authSlice";
-import { setPosts } from "@/redux/postSlice";
+import { setAllUser, setAuthUser, setSuggestedUsers, setUserFriend, setUserSavedPost } from "@/redux/authSlice";
+import { setPosts,  } from "@/redux/postSlice";
 
 
 const LeftSideBar = () => {
@@ -75,8 +75,12 @@ const LeftSideBar = () => {
                 withCredentials: true,
             });
             if (res.data.success) {
-                dispatch(setAuthUser(null));
-                // dispatch(setPosts(null))
+                dispatch(setAuthUser(null))
+                dispatch(setSuggestedUsers(null))
+                dispatch(setUserSavedPost(null))
+                dispatch(setUserFriend(null))
+                dispatch(setAllUser(null))
+                dispatch(setPosts(null))
                 toast.success(res.data.message);
                 navigate("/login");
             }

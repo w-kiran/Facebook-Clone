@@ -18,7 +18,7 @@ const Signup = () => {
 
   const [loading, setLoading] = useState(false)
   const navigate = useNavigate()
-  const {user}= useSelector(store=>store.auth)
+  const {user} = useSelector(store=>store.auth)
 
   const changeEventHandler = (e) => {
     setInput({ ...input, [e.target.name]: e.target.value });
@@ -52,12 +52,11 @@ const Signup = () => {
     }
   }
 
-  useEffect(()=>{
-    if(user){
-        navigate("/")
+  useEffect(() => {
+    if (user) {
+      navigate("/")
     }
-},[])
-
+  }, [])
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
       <div className="bg-white p-6 rounded-lg shadow-md w-96">
