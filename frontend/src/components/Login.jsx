@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { BACKEND_URL } from "../../configURL";
 import { toast } from 'sonner';
 import { Input } from "./ui/input";
@@ -50,6 +50,12 @@ const Login = () => {
             setLoading(false);
         }
     }
+
+    useEffect(()=>{
+        if(user){
+            navigate("/")
+        }
+    },[])
 
     return (
         <div className="flex min-h-screen items-center justify-center bg-gray-100">

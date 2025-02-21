@@ -17,7 +17,7 @@ const Friends = () => {
   const { userFriend } = useSelector(store => store.auth)
 
   return (
-    <div className='flex h-screen overflow-hidden bg-gray-100'>
+    <div className='flex h-full overflow-hidden bg-gray-100'>
       {/* Left Sidebar - Overlay when toggled */}
       <div
         className={`fixed top-50 left-0 h-full w-full md:w-[25%] bg-white overflow-y-auto scrollbar-thin shadow-lg transition-transform duration-300 z-50 ${hiddenLeft ? "translate-x-0" : "-translate-x-full"

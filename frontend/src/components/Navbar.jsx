@@ -5,7 +5,7 @@ import { FaFacebook } from "react-icons/fa6";
 import { FaFacebookMessenger } from "react-icons/fa";
 import { Avatar, AvatarImage, AvatarFallback } from "./ui/avatar";
 import { useDispatch, useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { BACKEND_URL } from "../../configURL";
 import { Input } from "./ui/input";
@@ -135,10 +135,10 @@ const Navbar = () => {
 
     return (
         <nav className="flex flex-col">
-            <div className="bg-white w-screen p-3 -mb-2 flex items-center justify-between sm:justify-between sticky top-0 z-50">
+            <div className="bg-white w-screen p-3 -mb-2 flex items-center justify-between sticky top-0 z-50">
                 {/* Left Section: Logo and Search */}
                 <div className="flex items-center md:space-x-3 space-x-3 sm:mr-[50px] ">
-                    <img src={logo} alt="logo" width={40} onClick={()=>{navigate('/')}} className="cursor-pointer"/>
+                    <img src={logo} alt="logo" width={40} onClick={() => { navigate('/') }} className="cursor-pointer" />
                     <div className="relative w-full md:w-full ">
                         <Search className="absolute left-3 top-2.5 text-gray-500" size={18} />
                         <Input type="text"
@@ -179,7 +179,7 @@ const Navbar = () => {
                 </div>
 
                 {/* Middle Section: Navigation Icons */}
-                <div className="flex md:space-x-[120px] items-center justify-center md:ml-[50px] lg:-ml-[50px] md:pr-[168px]">
+                <div className="flex items-center md:w-[50%] justify-between md:pr-[170px]">
                     <button
                         onClick={() => navbarHandler("home")}
                         className="relative flex-col items-center hidden md:flex"
@@ -310,7 +310,9 @@ const Navbar = () => {
                                         <span className="ml-4">{user?.username}</span>
                                     </div>
                                     <hr className="border-b bg-black w-full my-2" />
-                                    <span onClick={() => navigate(`profile/${user._id}`)} className="text-blue-500 font-semibold">See all profiles</span>
+                                    <span className="text-blue-500 font-semibold"><Link to={`/profile/${user?._id}`}>
+                                        See all profiles </Link>
+                                    </span>
 
                                     <div className="flex items-center gap-2 mt-2">
                                         <HelpCircle size={24} color="#422e2e" />
@@ -363,7 +365,7 @@ const Navbar = () => {
                     </div>
                 </div>
             </div>
-            <div className="bg-white w-full md:hidden -my-2 shadow-md p-3 flex items-center justify-between sticky top-0 z-10">
+            <div className="bg-white w-full md:hidden -my-2 px-5 shadow-md p-3 flex items-center justify-between sticky top-0 z-10">
                 <button
                     onClick={() => navbarHandler("home")}
                     className="relative flex-col items-center"

@@ -15,10 +15,10 @@ const Home = () => {
     useGetAllPost();
     useGetSuggestedUsers();
     return (
-        <div className="relative flex h-screen bg-gray-100">
+        <div className="relative flex bg-gray-100 h-full">
             {/* Left Sidebar - Overlay when toggled */}
             <div
-                className={`fixed top-50 left-0 h-full w-full md:w-[25%] overflow-y-auto scrollbar-thin shadow-lg transition-transform duration-300 z-20 ${
+                className={`fixed top-50 left-0 w-full h-full md:w-[25%] overflow-y-auto scrollbar-thin shadow-lg transition-transform duration-300 z-20 ${
                     hiddenLeft ? "translate-x-0" : "-translate-x-full"
                 } md:static md:translate-x-0`}
             >
@@ -28,7 +28,7 @@ const Home = () => {
             {/* Left Sidebar Toggle Button */}
             <Button
                 className="absolute w-2 top-0 z-50 md:hidden"
-                onClick={() => setHiddenLeft(!hiddenLeft)}
+                onClick={() => {setHiddenRight(false);setHiddenLeft(!hiddenLeft)}}
             >
                 <MoreVertical />
             </Button>
@@ -51,7 +51,7 @@ const Home = () => {
             {/* Right Sidebar Toggle Button */}
             <Button
                 className="absolute w-2 top-0 right-0 z-50 md:hidden"
-                onClick={() => setHiddenRight(!hiddenRight)}
+                onClick={() => {setHiddenLeft(false); setHiddenRight(!hiddenRight)}}
             >
                 <MoreVertical />
             </Button>

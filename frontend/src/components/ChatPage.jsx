@@ -10,7 +10,6 @@ import axios from 'axios';
 import { setMessages } from '../redux/chatSlice';
 import { BACKEND_URL } from '../../configURL';
 import { FaThumbsUp, FaRegThumbsUp } from 'react-icons/fa'; // Import icons
-import { FaArrowLeft } from 'react-icons/fa';  // Import back arrow icon
 import { PiPaperPlaneRightFill } from "react-icons/pi";
 import useGetAllUsers from '@/hooks/useGetAllUsers';
 import { useNavigate } from 'react-router-dom';
@@ -143,7 +142,7 @@ const ChatPage = () => {
               <span className="font-medium ml-4">{user?.username}</span>
             </div>
            <div onClick={()=>{navigate('/')}}>
-           <MoveLeftIcon/>
+           <MoveLeftIcon className='cursor-pointer'/>
            </div>
           </div>
                 <h1 className='font-bold text-xl mb-4'>Chats</h1>

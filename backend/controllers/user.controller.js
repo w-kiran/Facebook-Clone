@@ -7,6 +7,7 @@ import getDataUri from "../utils/datauri.js";
 import cloudinary from "../utils/cloudinary.js";
 import { Conversation } from "../models/conversation.model.js"
 import { Message } from "../models/message.model.js"
+import { Comment } from "../models/comment.model.js"
 
 export const register = async (req, res) => {
     try {
@@ -96,11 +97,22 @@ export const login = async (req, res) => {
             posts: populatedPosts
         }
 
-        return res.cookie('token', token, { httpOnly: true, sameSite: 'strict', maxAge: 1 * 24 * 60 * 60 * 1000 }).json({
+        return res.cookie('token', token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: 'none',
+            maxAge: 24 * 60 * 60 * 1000 // 1 day
+        }).json({
             message: `${user.username} Logged in successfully`,
             success: true,
             user
         })
+
+        // return res.cookie('token', token, { httpOnly: true, sameSite: 'strict', maxAge: 1 * 24 * 60 * 60 * 1000 }).json({
+        //     message: `${user.username} Logged in successfully`,
+        //     success: true,
+        //     user
+        // })
     } catch (error) {
         console.log(error);
     }
@@ -612,6 +624,7 @@ export const friendOrUnfriend = async (req, res) => {
 }
 
 export const deleteAccount = async (req, res) => {
+    console.log("deleteAccount");
     try {
         const userId = req.id;
         const user = await User.findById(userId)
@@ -623,21 +636,41 @@ export const deleteAccount = async (req, res) => {
             })
         }
 
-        const isDeleted = await Promise.all([
-            Post.deleteMany({ author: userId }),
-            Comment.deleteMany({ author: userId }),
-            Reactions.deleteMany({ author: userId }),
-            Message.deleteMany({ $or: [{ senderId: userId }, { receiverId: userId }] }),
-            Conversation.deleteMany({ participants: { $in: [userId] } }),
-            User.findByIdAndDelete(userId)
-        ])
+        // const isDeleted = await Promise.all([
+        //     Post.deleteMany({ author: userId }),
+        //     Comment.deleteMany({ author: userId }),
+        //     Reactions.deleteMany({ author: userId }),
+        //     Message.deleteMany({ $or: [{ senderId: userId }, { receiverId: userId }] }),
+        //     Conversation.deleteMany({ participants: { $in: [userId] } }),
+        //     User.findByIdAndDelete(userId)
+        // ])
 
-        if (!isDeleted) {
+        // console.log(isDeleted);
+        
+        // if (!isDeleted) {
+        //     return res.status(401).json({
+        //         message: "User not deleted",
+        //         success: false
+        //     })
+        // }
+
+        if(user){
+            await Promise.all([
+              Post.deleteMany({author:userId}),
+              Message.deleteMany({ $or: [{ senderId: userId }, { receiverId: userId }]}),
+              Conversation.deleteMany({participants:{$in:[userId]}}),
+              Comment.deleteMany({author:userId}),
+              Reactions.deleteMany({author:userId}),
+              User.findByIdAndDelete(userId)])
+          }
+  
+          const stillExists = await User.findById(userId);
+          if(stillExists){
             return res.status(401).json({
-                message: "User not deleted",
-                success: false
+              message:'Account deletion failed !!',
+              success:false
             })
-        }
+          }
 
         return res.status(200).json({
             message: "User deleted",

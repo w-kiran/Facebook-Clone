@@ -14,8 +14,8 @@ const RightSidebar = () => {
   const { onlineUsers} = useSelector(store => store.chat);
 
   return (
-    <div className='h-screen w-full flex flex-col ' >
-      <div className='mr-8 ml-4 h-screen mt-2'>
+    <div className='h-screen bg-gray-100 w-full flex flex-col' >
+      <div className='mr-6 ml-4 h-screen mt-2 scrollbar-none'>
         <h2>Sponsored</h2>
         <div className='flex items-center gap-2'>
           <img src={courseraads} alt="Logo" className="h-34 border rounded-sm mt-4 w-28 object-contain" />
@@ -33,15 +33,12 @@ const RightSidebar = () => {
         </div>
         <hr className="border-slate-300  mt-6" />
         <h2 className='mt-4 text-slate-700 font-bold'>Contacts</h2>
-        <div className='mt-1 '>
+        <div className='mt-1 border rounded-lg overflow-y-auto scrollbar-none mb-10 h-[46vh] md:h-[55vh]'>
           {allUsers.map((allUser) => {
             const isOnline = onlineUsers.includes(allUser?._id);
             const isSelected = selectedUser?._id === allUser?._id;
             return (
-              <div key={allUser?._id} onClick={() => {
-                setSelectedUser(allUser); // Set the selected user
-                navigate("/chat"); // Navigate to chat page
-              }}  className={`flex gap-3 bg-gray-100 items-center py-2 px-3 mb-1 hover:bg-gray-200 cursor-pointer rounded-full ${isSelected ? 'bg-gray-200 hover:bg-gray-200' : ''}`}>
+              <div key={allUser?._id} onClick={()=>navigate('/chat')} className={`flex gap-3 bg-gray-100 items-center py-2 px-3 my-1 hover:bg-gray-200 cursor-pointer rounded-full ${isSelected ? 'bg-gray-200 hover:bg-gray-200' : ''}`}>
                 <Avatar className='w-12 h-12'>
                   <AvatarImage src={allUser?.profilePicture} />
                   <AvatarFallback>CN</AvatarFallback>

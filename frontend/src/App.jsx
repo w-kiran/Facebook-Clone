@@ -15,37 +15,38 @@ import { BACKEND_URL } from '../configURL';
 import Friends from './components/Friends';
 import SuggestedUsers from './components/SuggestedUsers';
 import Saved from './components/Saved';
+import ProtectedRoutes from './components/ProtectedRoutes';
 
 const browserRouter = createBrowserRouter([
   {
     path: "/",
-    element: <MainLayout />,
+    element: <ProtectedRoutes><MainLayout /></ProtectedRoutes>,
     children: [
       {
         path: '/',
-        element: <Home />
+        element: <ProtectedRoutes><Home /></ProtectedRoutes>
       },
       {
         path: '/friends',
-        element: <Friends />
+        element: <ProtectedRoutes><Friends /></ProtectedRoutes>
       },
       {
         path: '/suggestedusers',
-        element: <SuggestedUsers />
+        element: <ProtectedRoutes><SuggestedUsers /></ProtectedRoutes>
       },
       {
         path: '/savedpost',
-        element: <Saved/>
+        element: <ProtectedRoutes><Saved/></ProtectedRoutes>
       }
     ]
   },
   {
     path: '/chat',
-    element: <ChatPage />
+    element: <ProtectedRoutes><ChatPage /></ProtectedRoutes>
   },
   {
     path: '/profile/:id',
-    element: <UserProfile />
+    element: <ProtectedRoutes><UserProfile /></ProtectedRoutes>
   },
   {
     path: '/login',
