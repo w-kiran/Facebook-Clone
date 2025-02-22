@@ -7,6 +7,7 @@ import getDataUri from "../utils/datauri.js";
 import cloudinary from "../utils/cloudinary.js";
 import { Conversation } from "../models/conversation.model.js"
 import { Message } from "../models/message.model.js"
+import { Comment } from "../models/comment.model.js"
 
 export const register = async (req, res) => {
     try {
