@@ -1,1 +1,1 @@
-export const BACKEND_URL = "https://facebook-clone-x0l1.onrender.com"
+export const BACKEND_URL = "https://facebookclone-zmcl.onrender.com"
