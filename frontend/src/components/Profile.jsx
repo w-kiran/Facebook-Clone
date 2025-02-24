@@ -60,7 +60,7 @@ const Profile = () => {
     } else if (tab === "friends") {
       newDisplayTab = userProfile?.friends || [];
     } else if (tab === "about") {
-      userbio = userProfile.bio || "";
+      userbio = userProfile?.bio || "";
       SetBio(userbio);
     } else if (tab === "saved") {
       newDisplayTab = userProfile?.saved || [];
@@ -346,7 +346,7 @@ const Profile = () => {
             <div className="flex flex-col w-full border rounded-md  bg-gray-100 p-2">
               <h2 className="font-semibold text-xl ">Intro</h2>
               <div className="flex flex-col items-center gap-2">
-                <h3 className="mt-2">{userProfile.username}</h3>
+                <h3 className="mt-2">{userProfile?.username}</h3>
                 <button
                   type="button"
                   className="px-6 w-full bg-gray-200 border rounded-md"
@@ -354,12 +354,12 @@ const Profile = () => {
                   Edit Profile
                 </button>
               </div>
-              {userProfile.gender && <p> Gender : {userProfile.gender}</p>}
+              {userProfile.gender && <p> Gender : {userProfile?.gender}</p>}
 
               {user?.bio && (
                 <div className="mt-2">
                   <span className="font-medium">Bio:</span>{" "}
-                  <p className="text-gray-700">{userProfile.bio}</p>
+                  <p className="text-gray-700">{userProfile?.bio}</p>
                 </div>
               )}
             </div>
@@ -373,7 +373,7 @@ const Profile = () => {
                   <div
                     className="hover:bg-gray-100 cursor-pointer  flex items-center justify-between gap-4 p-4"
                     key={friend._id}
-                    onClick={() => navigate(`/profile/${friend._id}`)}
+                    onClick={() => navigate(`/profile/${friend?._id}`)}
                   >
                     <div className="ml-10">
                       <Avatar className="w-16 h-16 ">
@@ -403,7 +403,7 @@ const Profile = () => {
                     <div
                       className="hover:bg-gray-100 cursor-pointer  flex items-center justify-between gap-4 p-4"
                       key={mutualfriend._id}
-                      onClick={() => navigate(`/profile/${mutualfriend._id}`)}
+                      onClick={() => navigate(`/profile/${mutualfriend?._id}`)}
                     >
                       <div className="ml-10">
                         <Avatar className="w-16 h-16 ">
@@ -413,7 +413,7 @@ const Profile = () => {
                             alt={mutualfriend?.username}
                           />
                           <AvatarFallback>
-                            {mutualfriend?.username.charAt(0)}
+                            {mutualfriend?.username ? mutualfriend.username.charAt(0) : "?"}
                           </AvatarFallback>
                         </Avatar>
                       </div>
