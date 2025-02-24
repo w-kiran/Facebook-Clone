@@ -383,7 +383,7 @@ const Profile = () => {
                           alt={friend?.username}
                         />
                         <AvatarFallback>
-                          {friend && friend?.username.charAt(0)}
+                          {friend?.username ? friend.username.charAt(0) : "?"}
                         </AvatarFallback>
                       </Avatar>
                     </div>
