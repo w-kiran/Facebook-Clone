@@ -395,7 +395,7 @@ export const friendOrUnfriend = async (req, res) => {
             })
         }
 
-        const isFriends = user.friends.includes(targetUser) && targetUserP.friends.includes(userId);
+        const isFriends =  user.friends.includes(targetUser) && targetUserP.friends.includes(userId);
 
         if (isFriends) {
             await Promise.all([
@@ -413,6 +413,8 @@ export const friendOrUnfriend = async (req, res) => {
                 })
             )).filter(post => post !== null);
 
+
+            user = await User.findById(userId)
             user = {
                 _id: user._id,
                 username: user.username,
@@ -423,7 +425,7 @@ export const friendOrUnfriend = async (req, res) => {
                 posts: populatedPosts,
             };
 
-
+            targetUserP = await User.findById(targetUser);
             await targetUserP.populate([
                 {
                     path: "posts",
@@ -518,7 +520,8 @@ export const friendOrUnfriend = async (req, res) => {
                     return null;
                 })
             )).filter(post => post !== null);
-
+         
+           user = await User.findById(userId)
             user = {
                 _id: user._id,
                 username: user.username,
@@ -529,7 +532,7 @@ export const friendOrUnfriend = async (req, res) => {
                 posts: populatedPosts,
             };
 
-
+            targetUserP = await User.findById(targetUser);
             await targetUserP.populate([
                 {
                     path: "posts",
@@ -556,8 +559,7 @@ export const friendOrUnfriend = async (req, res) => {
                         },
                         {
                             path: "originalPost",
-                            populate: [
-                                { path: "author", select: "username profilePicture" },
+                            populate: [{ path: "author", select: "username profilePicture" },
                                 {
                                     path: "comments",
                                     options: { sort: { createdAt: -1 } },
@@ -609,7 +611,6 @@ export const friendOrUnfriend = async (req, res) => {
                 targetUser: targetUserP
             })
         }
-
 
 
     } catch (error) {
