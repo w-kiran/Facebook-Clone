@@ -21,7 +21,7 @@ import useGetAllPost from "@/hooks/useGetAllPost";
 import useGetMutualFriends from "@/hooks/useGetMutualFriends";
 
 const Profile = () => {
-
+  
   const params = useParams();
   const userId = params.id;
   useGetMutualFriends();
@@ -38,10 +38,15 @@ const Profile = () => {
   const [open, setOpen] = useState(false);
   const [activePost, setActivePost] = useState(null);
 
-  let [isFriend, setIsFriend] = useState(userProfile?.friends?.includes(user._id))
+  let isFriend = user?.friends?.includes(userId);
 
   useEffect(() => {
     setDisplayTab(userProfile?.posts || []);
+    // if (user._id === userProfile._id) {
+    //   setActiveTab((prevTab) => prevTab || "saved");
+    // } else {
+    //   setActiveTab("posts");
+    // }
   }, [userProfile]);
 
   const handleTabChange = (tab) => {
@@ -55,7 +60,7 @@ const Profile = () => {
     } else if (tab === "friends") {
       newDisplayTab = userProfile?.friends || [];
     } else if (tab === "about") {
-      userbio = userProfile.bio || "";
+      userbio = userProfile?.bio || "";
       SetBio(userbio);
     } else if (tab === "saved") {
       newDisplayTab = userProfile?.saved || [];
@@ -73,7 +78,9 @@ const Profile = () => {
       if (res.data.success) {
         dispatch(setAuthUser(res.data.user));
         dispatch(setUserProfile(res.data.targetUser));
-        setIsFriend(!isFriend);
+
+        // setIsFriend(res.data.user.friends.includes(userId));
+        isFriend = !isFriend;
         toast.success(res.data.message);
       }
     } catch (error) {
@@ -124,11 +131,11 @@ const Profile = () => {
 
   return (
     <div className="flex flex-col items-center w-full h-screen flex-grow relative ">
-
-      <div className="relative w-full h-[60%] mt-1">
-        {userProfile && userProfile.coverPicture ? (
+      {/* Cover Photo */}
+      <div className="relative w-full h-[60%] ">
+        {userProfile && userProfile.coverPhoto ? (
           <img
-            src={userProfile?.coverPicture}
+            src={userProfile?.coverPhoto}
             alt="cover"
             className="w-[96%] mx-auto md:w-[70%] h-[100%] object-center md:ml-[15%] rounded-lg"
           />
@@ -136,7 +143,7 @@ const Profile = () => {
           <img
             src={blankcover}
             alt="cover"
-            className=" w-[96%] md:w-[70%] h-[100%] object-center md:ml-[15%] rounded-lg"
+            className="md:w-[70%] w-[96%] h-[100%] object-center md:ml-[15%] rounded-lg"
           />
         )}
         {isLoggedInUserProfile && (
@@ -146,7 +153,8 @@ const Profile = () => {
         )}
       </div>
 
-      <div className="flex justify-between  bg-white p-2  md:p-6 shadow-md -mt-16 rounded-lg w-[96%] md:w-[70%]   md:mx-[10%]">
+      {/* Profile Section */}
+      <div className="flex justify-between  bg-white md:p-6 shadow-md -mt-16 rounded-lg md:w-[70%] w-[96%] md:mx-[10%]">
         <div className="flex justify-start">
           <Avatar className="h-32 w-32 border-4 border-white shadow-lg">
             {userProfile && userProfile.profilePicture ? (
@@ -156,26 +164,30 @@ const Profile = () => {
             )}
             <AvatarFallback>CN</AvatarFallback>
           </Avatar>
-          <div className="flex flex-col mt-4 md:ml-8">
-            <h2 className=" ms:text-xl font-bold mt-14  md:mt-10">
+          <div className="flex flex-col ml-5 mt-4">
+            <h2 className="md:text-2xl font-bold mt-14 md:mt-9">
               {userProfile?.username}
             </h2>
-
-            {user?._id === userProfile._id && (<p onClick={() => handleTabChange("friends")} className="text-gray-500 mt-4   cursor-pointer flex">
+            {user?._id === userProfile._id && (<p onClick={() => handleTabChange("friends")} className="md:text-md text-xs text-gray-500 mt-2 md:mr-[135px] cursor-pointer">
               {userProfile?.friends?.length || 0} friends
             </p>)}
-            {user?._id !== userProfile._id && (<p onClick={() => handleTabChange("friends")} className="text-gray-500 mt-4   cursor-pointer flex">
+            {user?._id !== userProfile._id && (<p onClick={() => handleTabChange("friends")} className="text-gray-500 mt-4 mr-[135px] cursor-pointer">
               {userProfile?.friends?.length || 0} friends , {mutualFriends.length} mutual friends
             </p>)}
           </div>
         </div>
-        <div className="md:mt-14 mt-24 md:ml-6 flex gap-2  ">
+        <div className="md:mt-14 mt-[75px] mr-5 md:ml-6 flex gap-2">
           {isLoggedInUserProfile ? (
-            <Button onClick={() => setOpen(!open)} variant="secondary" className='text-xs'>
+            <Button onClick={() => setOpen(!open)} variant="secondary" className="text-xs w-17 h-7">
               Edit Profile
             </Button>
           ) : (
-            <Button onClick={friendReqHandler} className={isFriend ? "bg-gray-500 text-white text-xs md:text-normal" : "bg-blue-500 text-white text-xs md:text-normal "}>
+            <Button
+              onClick={friendReqHandler}
+              className={
+                isFriend ? "bg-gray-500 text-white" : "bg-blue-500 text-white"
+              }
+            >
               {isFriend ? "Remove Friend" : "Send Friend"}
             </Button>
           )}
@@ -348,9 +360,9 @@ const Profile = () => {
               <div className="flex flex-col my-2 ">
                 {displayTab.map((friend) => (
                   <div
-                    className="hover:bg-gray-100 cursor-pointer  flex items-center justify-between gap-4 p-4"
+                    className="hover:bg-gray-100 cursor-pointer flex items-center p-4"
                     key={friend._id}
-                    onClick={() => navigate(`/profile/${friend._id}`)}
+                    onClick={() => {navigate(`/profile/${friend._id}`),setActiveTab("posts")}}
                   >
                     <div className="ml-10">
                       <Avatar className="w-16 h-16 ">
