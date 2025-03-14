@@ -163,7 +163,7 @@ const Post = ({ post }) => {
                         <span onClick={() => {
                             dispatch(setSelectedPost(post));
                             setOpen(true);
-                        }} className='cursor-pointer text-sm '>{post.comments.length} comments</span> • <span>682 shares</span>
+                        }} className='cursor-pointer text-sm '>{post?.comments?.length} comments</span> • <span>682 shares</span>
                     </div>
                 </div>
 
