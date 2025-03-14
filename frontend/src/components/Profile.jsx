@@ -72,11 +72,7 @@ const Profile = () => {
 
       if (res.data.success) {
         dispatch(setAuthUser(res.data.user));
-        console.log("loginuser", res.data.user);
-
         dispatch(setUserProfile(res.data.targetUser));
-        console.log("userProfile", res.data.targetUser);
-
         setIsFriend(!isFriend);
         toast.success(res.data.message);
       }
