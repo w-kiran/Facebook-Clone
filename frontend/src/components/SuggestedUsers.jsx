@@ -45,7 +45,7 @@ const SuggestedUsers = () => {
       {/* Left Sidebar Toggle Button */}
       <Button
         className="absolute w-2 top-50 z-50 md:hidden"
-        onClick={() => setHiddenLeft(!hiddenLeft)}
+        onClick={() => {setHiddenRight(false),setHiddenLeft(!hiddenLeft)}}
       >
         <MoreVertical />
       </Button>
@@ -87,7 +87,7 @@ const SuggestedUsers = () => {
       {/* Right Sidebar Toggle Button */}
       <Button
         className="absolute w-2 top-50 right-0 z-50 md:hidden"
-        onClick={() => setHiddenRight(!hiddenRight)}
+        onClick={() => {setHiddenLeft(false),setHiddenRight(!hiddenRight)}}
       >
         <MoreVertical />
       </Button>
