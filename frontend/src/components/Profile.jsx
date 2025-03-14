@@ -21,7 +21,7 @@ import useGetAllPost from "@/hooks/useGetAllPost";
 import useGetMutualFriends from "@/hooks/useGetMutualFriends";
 
 const Profile = () => {
-  
+
   const params = useParams();
   const userId = params.id;
   useGetMutualFriends();
@@ -34,19 +34,14 @@ const Profile = () => {
   const isLoggedInUserProfile = user?._id === userProfile?._id;
   const [displayTab, setDisplayTab] = useState([]);
   const [bio, SetBio] = useState("");
-  const [threeDot, setThreeDot] = useState(false);
   const dispatch = useDispatch();
   const [open, setOpen] = useState(false);
+  const [activePost, setActivePost] = useState(null);
 
-  let isFriend = user?.friends?.includes(userId);
+  let [isFriend, setIsFriend] = useState(userProfile?.friends?.includes(user._id))
 
   useEffect(() => {
     setDisplayTab(userProfile?.posts || []);
-    // if (user._id === userProfile._id) {
-    //   setActiveTab((prevTab) => prevTab || "saved");
-    // } else {
-    //   setActiveTab("posts");
-    // }
   }, [userProfile]);
 
   const handleTabChange = (tab) => {
@@ -60,7 +55,7 @@ const Profile = () => {
     } else if (tab === "friends") {
       newDisplayTab = userProfile?.friends || [];
     } else if (tab === "about") {
-      userbio = userProfile?.bio || "";
+      userbio = userProfile.bio || "";
       SetBio(userbio);
     } else if (tab === "saved") {
       newDisplayTab = userProfile?.saved || [];
@@ -77,10 +72,12 @@ const Profile = () => {
 
       if (res.data.success) {
         dispatch(setAuthUser(res.data.user));
-        dispatch(setUserProfile(res.data.targetUser));
+        console.log("loginuser", res.data.user);
 
-        // setIsFriend(res.data.user.friends.includes(userId));
-        isFriend = !isFriend;
+        dispatch(setUserProfile(res.data.targetUser));
+        console.log("userProfile", res.data.targetUser);
+
+        setIsFriend(!isFriend);
         toast.success(res.data.message);
       }
     } catch (error) {
@@ -131,11 +128,11 @@ const Profile = () => {
 
   return (
     <div className="flex flex-col items-center w-full h-screen flex-grow relative ">
-      {/* Cover Photo */}
-      <div className="relative w-full h-[60%] ">
-        {userProfile && userProfile.coverPhoto ? (
+
+      <div className="relative w-full h-[60%] mt-1">
+        {userProfile && userProfile.coverPicture ? (
           <img
-            src={userProfile?.coverPhoto}
+            src={userProfile?.coverPicture}
             alt="cover"
             className="w-[96%] mx-auto md:w-[70%] h-[100%] object-center md:ml-[15%] rounded-lg"
           />
@@ -143,7 +140,7 @@ const Profile = () => {
           <img
             src={blankcover}
             alt="cover"
-            className="md:w-[70%] w-[96%] h-[100%] object-center md:ml-[15%] rounded-lg"
+            className=" w-[96%] md:w-[70%] h-[100%] object-center md:ml-[15%] rounded-lg"
           />
         )}
         {isLoggedInUserProfile && (
@@ -153,8 +150,7 @@ const Profile = () => {
         )}
       </div>
 
-      {/* Profile Section */}
-      <div className="flex justify-between  bg-white md:p-6 shadow-md -mt-16 rounded-lg md:w-[70%] w-[96%] md:mx-[10%]">
+      <div className="flex justify-between  bg-white p-2  md:p-6 shadow-md -mt-16 rounded-lg w-[96%] md:w-[70%]   md:mx-[10%]">
         <div className="flex justify-start">
           <Avatar className="h-32 w-32 border-4 border-white shadow-lg">
             {userProfile && userProfile.profilePicture ? (
@@ -164,39 +160,34 @@ const Profile = () => {
             )}
             <AvatarFallback>CN</AvatarFallback>
           </Avatar>
-          <div className="flex flex-col ml-5 mt-4">
-            <h2 className="md:text-2xl font-bold mt-14 md:mt-9">
+          <div className="flex flex-col mt-4 md:ml-8">
+            <h2 className=" ms:text-xl font-bold mt-14  md:mt-10">
               {userProfile?.username}
             </h2>
-            {user?._id === userProfile._id && (<p onClick={() => handleTabChange("friends")} className="md:text-md text-xs text-gray-500 mt-2 md:mr-[135px] cursor-pointer">
+
+            {user?._id === userProfile._id && (<p onClick={() => handleTabChange("friends")} className="text-gray-500 mt-4   cursor-pointer flex">
               {userProfile?.friends?.length || 0} friends
             </p>)}
-            {user?._id !== userProfile._id && (<p onClick={() => handleTabChange("friends")} className="text-gray-500 mt-4 mr-[135px] cursor-pointer">
+            {user?._id !== userProfile._id && (<p onClick={() => handleTabChange("friends")} className="text-gray-500 mt-4   cursor-pointer flex">
               {userProfile?.friends?.length || 0} friends , {mutualFriends.length} mutual friends
             </p>)}
           </div>
         </div>
-        <div className="md:mt-14 mt-[75px] mr-5 md:ml-6 flex gap-2">
+        <div className="md:mt-14 mt-24 md:ml-6 flex gap-2  ">
           {isLoggedInUserProfile ? (
-            <Button onClick={() => setOpen(!open)} variant="secondary" className="text-xs w-17 h-7">
+            <Button onClick={() => setOpen(!open)} variant="secondary" className='text-xs'>
               Edit Profile
             </Button>
           ) : (
-            <Button
-              onClick={friendReqHandler}
-              className={
-                isFriend ? "bg-gray-500 text-white" : "bg-blue-500 text-white"
-              }
-            >
+            <Button onClick={friendReqHandler} className={isFriend ? "bg-gray-500 text-white text-xs md:text-normal" : "bg-blue-500 text-white text-xs md:text-normal "}>
               {isFriend ? "Remove Friend" : "Send Friend"}
             </Button>
           )}
         </div>
       </div>
 
-      {/* Tabs */}
-      <div className="w-[96%] md:max-w-5xl mt-6 ">
-        <div className="flex justify-center md:gap-10 gap-2 border-b py-3 text-sm text-gray-600">
+      <div className="w-full md:max-w-5xl mt-6 ">
+        <div className="flex justify-center gap-3 md:gap-10 border-b py-3 text-gray-600">
           {["posts", "about", "friends", "photos", "videos", "saved"].map(
             (tab) => (
               <span
@@ -212,9 +203,8 @@ const Profile = () => {
         </div>
       </div>
 
-      <div className="flex p-2 w-[96] bg-gray-100 d:w-2/3 md:gap-4 ">
-        {/* Sidebar */}
-        <div className="hidden md:flex flex-col md:w-[22%] border rounded-md  min-h-[200px] max-h-[400px]  p-2">
+      <div className="flex p-2  md:w-2/3 gap-4 ">
+        <div className=" hidden md:flex flex-col  md:w-[22%] border rounded-md  min-h-[200px] max-h-[400px]  p-2">
           <h2 className="font-semibold text-xl ">Intro</h2>
           <div className="flex flex-col items-center gap-2">
             <h3 className="mt-2">{userProfile?.username}</h3>
@@ -240,8 +230,7 @@ const Profile = () => {
           )}
         </div>
 
-        {/* Dynamic Content Section */}
-        <div className="flex-1 bg-gray-100 w-full">
+        <div className="flex-1 bg-white">
           {activeTab === "photos" && (
             <div className="grid grid-cols-3 gap-4">
               {displayTab
@@ -259,86 +248,78 @@ const Profile = () => {
           )}
 
           {activeTab === "posts" && displayTab.length > 0 && (
-            <div className="flex flex-col item-center justify-center w-[96%] mx-auto">
-              <div className="flex items-center justify-center mt-5">
-                {user?._id === userProfile?._id && <CreatePost />}
+            <div className="flex flex-col w-full ">
+              {user._id === userProfile._id && <CreatePost />}
+              <div>
+                {displayTab.map((post) => (
+                  <Post key={post._id} post={post} />
+                ))}
               </div>
-              <div className="-mb-10">
-                {posts && posts.length > 0 ? (
-                  posts.map((post) => <Post key={post._id} post={post} />)
-                ) : (
-                  <p>No posts available</p>
-                )}
-              </div>
-
             </div>
           )}
 
           {activeTab === "saved" && (
             <div className="flex flex-col">
-              {displayTab.map((post) => (
-                <div
-                  key={post._id}
-                  className="flex justify-between cursor-pointer relative border rounded-md bg-slate-50 mb-2 "
-                >
-                  <div className="flex items-center">
-                    <img
-                      src={post.image}
-                      alt="post"
-                      className="rounded-lg w-2/6 mt-5 ml-5 mb-4 object-cover"
-                    />
-                    <span className="ml-10">{post.caption}</span>
-                  </div>
-                  <MoreHorizontal
-                    onClick={() => {
-                      setThreeDot(!threeDot);
-                      dispatch(setSelectedPost(post));
-                    }}
-                    className="cursor-pointer mr-4  mt-8 "
-                  />
-                  {threeDot && (
-                    <div
-                      className="absolute flex flex-col right-2 items-center ml-4
-                                          top-14 bg-white shadow-md  w-2/3  border rounded-md z-20 gap-2 my-2 cursor-pointer"
-                    >
-                      <h2 className="mt-2">Post Options</h2>
-                      {post.author._id === user?._id && (
-                        <h2
-                          onClick={deletePostHandler}
-                          className="flex items-center mr-1"
-                        >
-                          <RiDeleteBin6Line className="mr-1" />
-                          Delete Post
-                        </h2>
-                      )}
-
-                      <h2
-                        className="mb-2 flex items-center "
-                        onClick={() => {
-                          navigate(`/profile/${post.author._id}`);
-                          setThreeDot(!threeDot);
-                          setActiveTab("posts");
-                        }}
-                      >
-                        <Avatar className="mr-2 h-4 w-4">
-                          <AvatarImage src={post.author.profilePicture} />
-                          <AvatarFallback>C</AvatarFallback>
-                        </Avatar>{" "}
-                        View Profile
-                      </h2>
-
-                      {
-                        user._id === userProfile._id &&
-                        <h2 className="mb-2 flex items-center" onClick={savedHandler}>
-                          <IoBookmarkOutline className="mr-1" />
-                          Remove from saved
-                        </h2>
-                      }
-
+              {displayTab.filter((post) => post.image)
+                .map((post) => (
+                  <div
+                    key={post._id}
+                    className="flex justify-between cursor-pointer relative border rounded-md bg-slate-50 mb-2"
+                  >
+                    <div className="flex items-center">
+                      <img
+                        src={post?.image}
+                        alt="post"
+                        className="rounded-lg w-2/6 mt-5 ml-5 mb-4 object-cover"
+                      />
+                      <span className="ml-10">{post?.caption}</span>
                     </div>
-                  )}
-                </div>
-              ))}
+                    <MoreHorizontal
+                      onClick={() => {
+                        setActivePost(activePost === post._id ? null : post._id);
+                        dispatch(setSelectedPost(post));
+                      }}
+                      className="cursor-pointer mr-4 mt-8"
+                    />
+                    {activePost === post._id && ( // Ensure only the clicked post's menu is open
+                      <div
+                        className="absolute flex flex-col right-2 items-center ml-4
+                        top-14 bg-white shadow-md w-2/3 border rounded-md z-20 gap-2 my-2 cursor-pointer"
+                      >
+                        <h2 className="mt-2">Post Options</h2>
+                        {post.author._id === user?._id && (
+                          <h2
+                            onClick={deletePostHandler}
+                            className="flex items-center mr-1"
+                          >
+                            <RiDeleteBin6Line className="mr-1" />
+                            Delete Post
+                          </h2>
+                        )}
+                        <h2
+                          className="mb-2 flex items-center"
+                          onClick={() => {
+                            navigate(`/profile/${post.author._id}`);
+                            setActivePost(null);
+                            setActiveTab("posts");
+                          }}
+                        >
+                          <Avatar className="mr-2 h-4 w-4">
+                            <AvatarImage src={post.author.profilePicture} />
+                            <AvatarFallback>C</AvatarFallback>
+                          </Avatar>{" "}
+                          View Profile
+                        </h2>
+                        {user._id === userProfile._id && (
+                          <h2 className="mb-2 flex items-center" onClick={savedHandler}>
+                            <IoBookmarkOutline className="mr-1" />
+                            Remove from saved
+                          </h2>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                ))}
             </div>
           )}
 
@@ -346,7 +327,7 @@ const Profile = () => {
             <div className="flex flex-col w-full border rounded-md  bg-gray-100 p-2">
               <h2 className="font-semibold text-xl ">Intro</h2>
               <div className="flex flex-col items-center gap-2">
-                <h3 className="mt-2">{userProfile?.username}</h3>
+                <h3 className="mt-2">{userProfile.username}</h3>
                 <button
                   type="button"
                   className="px-6 w-full bg-gray-200 border rounded-md"
@@ -354,12 +335,12 @@ const Profile = () => {
                   Edit Profile
                 </button>
               </div>
-              {userProfile.gender && <p> Gender : {userProfile?.gender}</p>}
+              {userProfile.gender && <p> Gender : {userProfile.gender}</p>}
 
               {user?.bio && (
                 <div className="mt-2">
                   <span className="font-medium">Bio:</span>{" "}
-                  <p className="text-gray-700">{userProfile?.bio}</p>
+                  <p className="text-gray-700">{userProfile.bio}</p>
                 </div>
               )}
             </div>
@@ -373,7 +354,7 @@ const Profile = () => {
                   <div
                     className="hover:bg-gray-100 cursor-pointer  flex items-center justify-between gap-4 p-4"
                     key={friend._id}
-                    onClick={() => navigate(`/profile/${friend?._id}`)}
+                    onClick={() => navigate(`/profile/${friend._id}`)}
                   >
                     <div className="ml-10">
                       <Avatar className="w-16 h-16 ">
@@ -383,7 +364,7 @@ const Profile = () => {
                           alt={friend?.username}
                         />
                         <AvatarFallback>
-                          {friend?.username ? friend.username.charAt(0) : "?"}
+                          {friend && friend?.username?.charAt(0)}
                         </AvatarFallback>
                       </Avatar>
                     </div>
@@ -403,7 +384,7 @@ const Profile = () => {
                     <div
                       className="hover:bg-gray-100 cursor-pointer  flex items-center justify-between gap-4 p-4"
                       key={mutualfriend._id}
-                      onClick={() => navigate(`/profile/${mutualfriend?._id}`)}
+                      onClick={() => navigate(`/profile/${mutualfriend._id}`)}
                     >
                       <div className="ml-10">
                         <Avatar className="w-16 h-16 ">
@@ -413,7 +394,7 @@ const Profile = () => {
                             alt={mutualfriend?.username}
                           />
                           <AvatarFallback>
-                            {mutualfriend?.username ? mutualfriend.username.charAt(0) : "?"}
+                            {mutualfriend?.username.charAt(0)}
                           </AvatarFallback>
                         </Avatar>
                       </div>
@@ -429,12 +410,13 @@ const Profile = () => {
 
             </div>
           )}
+
+
         </div>
       </div>
       <EditProfile open={open} setOpen={setOpen} userProfile={userProfile} />
     </div>
   );
-
 };
 
 
